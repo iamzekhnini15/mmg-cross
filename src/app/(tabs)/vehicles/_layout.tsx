@@ -4,9 +4,7 @@ export default function VehiclesLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: '#0F0F10' },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: { fontWeight: '600' },
+        headerShown: false,
         contentStyle: { backgroundColor: '#0F0F10' },
       }}
     />
