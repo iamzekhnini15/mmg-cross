@@ -1,34 +1,34 @@
-import { useCallback, useState } from 'react';
-import { Text, View, ScrollView, Alert, Pressable, Modal } from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Card, StatusBadge, LoadingSpinner, Button } from '@/components/ui';
-import { StatusStepper } from '@/features/vehicles/components/StatusStepper';
-import { StatusHistory } from '@/features/vehicles/components/StatusHistory';
+import { Button, Card, LoadingSpinner, StatusBadge } from '@/components/ui';
 import { ExpenseList } from '@/features/expenses/components/ExpenseList';
-import { PhotoGallery } from '@/features/media/components/PhotoGallery';
 import { DocumentList } from '@/features/media/components/DocumentList';
+import { PhotoGallery } from '@/features/media/components/PhotoGallery';
 import { SaleForm } from '@/features/sales/components/SaleForm';
 import { useSale } from '@/features/sales/hooks/useSales';
+import { StatusHistory } from '@/features/vehicles/components/StatusHistory';
+import { StatusStepper } from '@/features/vehicles/components/StatusStepper';
 import {
-  useVehicleWithExpenses,
   useChangeVehicleStatus,
   useDeleteVehicle,
+  useVehicleWithExpenses,
 } from '@/features/vehicles/hooks/useVehicles';
 import {
   FUEL_TYPE_LABELS,
-  TRANSMISSION_LABELS,
+  PAYMENT_METHOD_LABELS,
   SELLER_TYPE_LABELS,
   STATUS_LABELS,
-  PAYMENT_METHOD_LABELS,
+  TRANSMISSION_LABELS,
   WARRANTY_LABELS,
-  type VehicleStatus,
   type FuelType,
-  type TransmissionType,
-  type SellerType,
   type PaymentMethod,
+  type SellerType,
+  type TransmissionType,
+  type VehicleStatus,
   type WarrantyOption,
 } from '@/lib/constants';
+import { Ionicons } from '@expo/vector-icons';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', {

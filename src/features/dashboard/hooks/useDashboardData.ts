@@ -1,12 +1,11 @@
-import { useMemo } from 'react';
 import { useVehicles } from '@/features/vehicles/hooks/useVehicles';
-import { useAllExpenses, buildExpenseMap } from './useAllExpenses';
+import type { VehicleStatus } from '@/lib/constants';
+import { STATUS_LABELS, VEHICLE_STATUS_ORDER } from '@/lib/constants';
+import type { Sale, Vehicle } from '@/types/database';
+import { useMemo } from 'react';
+import { buildExpenseMap, useAllExpenses } from './useAllExpenses';
 import { useAllSales } from './useAllSales';
 import { useVehicleThumbnails } from './useVehicleThumbnails';
-import { VEHICLE_STATUS_ORDER, STATUS_LABELS } from '@/lib/constants';
-import type { Vehicle } from '@/types/database';
-import type { Sale } from '@/types/database';
-import type { VehicleStatus } from '@/lib/constants';
 
 export interface KanbanVehicle {
   vehicle: Vehicle;

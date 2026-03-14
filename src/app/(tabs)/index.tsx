@@ -1,11 +1,11 @@
-import { Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { LoadingSpinner } from '@/components/ui';
+import { KanbanBoard } from '@/features/dashboard/components/KanbanBoard';
+import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
 import { useAuth } from '@/hooks/useAuth';
 import { useGarageStore } from '@/stores/garageStore';
-import { LoadingSpinner } from '@/components/ui';
-import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
-import { KanbanBoard } from '@/features/dashboard/components/KanbanBoard';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 
 export default function DashboardScreen() {
   const { signOut } = useAuth();

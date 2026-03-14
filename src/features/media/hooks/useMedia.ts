@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Media, MediaInsert } from '@/types/database';
 import { useGarageStore } from '@/stores/garageStore';
+import type { Media, MediaInsert } from '@/types/database';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 function mediaKey(vehicleId: string) {
   return ['media', vehicleId] as const;

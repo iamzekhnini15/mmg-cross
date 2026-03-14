@@ -1,7 +1,7 @@
-import { Redirect } from 'expo-router';
+import { LoadingSpinner } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { useGarageStore } from '@/stores/garageStore';
-import { LoadingSpinner } from '@/components/ui';
+import { Redirect } from 'expo-router';
 
 export default function Index() {
   const isLoading = useAuthStore((state) => state.isLoading);

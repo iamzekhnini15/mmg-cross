@@ -1,5 +1,5 @@
-import { View, Pressable, Text } from 'react-native';
-import { VEHICLE_STATUS_ORDER, STATUS_LABELS, type VehicleStatus } from '@/lib/constants';
+import { STATUS_LABELS, VEHICLE_STATUS_ORDER, type VehicleStatus } from '@/lib/constants';
+import { Pressable, Text, View } from 'react-native';
 
 interface StatusFilterProps {
   selected: VehicleStatus | null;

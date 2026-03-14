@@ -1,8 +1,8 @@
-import { Pressable, Text, View } from 'react-native';
-import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
-import { formatPrice } from '@/lib/formatters';
 import type { KanbanVehicle } from '@/features/dashboard/hooks/useDashboardData';
+import { formatPrice } from '@/lib/formatters';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { Pressable, Text, View } from 'react-native';
 
 interface KanbanVehicleCardProps {
   data: KanbanVehicle;

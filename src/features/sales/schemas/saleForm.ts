@@ -1,5 +1,5 @@
+import { CIVILITIES, CLIENT_TYPES, PAYMENT_METHODS, WARRANTY_OPTIONS } from '@/lib/constants';
 import { z } from 'zod';
-import { PAYMENT_METHODS, WARRANTY_OPTIONS, CLIENT_TYPES, CIVILITIES } from '@/lib/constants';
 
 const paymentMethodValues = Object.values(PAYMENT_METHODS) as [string, ...string[]];
 const warrantyValues = Object.values(WARRANTY_OPTIONS) as [string, ...string[]];

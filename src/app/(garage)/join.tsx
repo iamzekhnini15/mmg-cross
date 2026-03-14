@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Text, View, Pressable, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Input } from '@/components/ui';
 import { useJoinGarage } from '@/features/garages/hooks/useGarages';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Pressable, Text, View } from 'react-native';
 
 export default function JoinGarageScreen() {
   const router = useRouter();

@@ -1,8 +1,8 @@
-import { Redirect, Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { LoadingSpinner } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { useGarageStore } from '@/stores/garageStore';
-import { LoadingSpinner } from '@/components/ui';
+import { Ionicons } from '@expo/vector-icons';
+import { Redirect, Tabs } from 'expo-router';
 
 export default function TabsLayout() {
   const isLoading = useAuthStore((state) => state.isLoading);

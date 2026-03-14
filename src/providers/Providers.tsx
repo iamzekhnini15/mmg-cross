@@ -1,10 +1,10 @@
-import { useEffect, type ReactNode } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { useGarageStore } from '@/stores/garageStore';
 import type { Garage, GarageMember } from '@/types/database';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, type ReactNode } from 'react';
 
 interface ProvidersProps {
   children: ReactNode;

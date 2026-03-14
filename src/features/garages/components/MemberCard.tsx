@@ -1,12 +1,12 @@
-import { Text, View, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import type { GarageMember } from '@/types/database';
 import {
   GARAGE_ROLE_LABELS,
   MEMBER_STATUS_LABELS,
   type GarageRole,
   type MemberStatus,
 } from '@/lib/constants';
+import type { GarageMember } from '@/types/database';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, Text, View } from 'react-native';
 
 interface MemberCardProps {
   member: GarageMember;

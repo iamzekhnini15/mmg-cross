@@ -1,5 +1,5 @@
-import { create } from 'zustand';
 import type { Garage, GarageMember } from '@/types/database';
+import { create } from 'zustand';
 
 interface GarageState {
   currentGarage: Garage | null;

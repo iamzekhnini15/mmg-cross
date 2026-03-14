@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Text, View, Pressable, Alert, Platform } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
-import { Ionicons } from '@expo/vector-icons';
 import { useRegenerateInviteCode } from '@/features/garages/hooks/useGarages';
+import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
+import { useState } from 'react';
+import { Alert, Platform, Pressable, Text, View } from 'react-native';
 
 interface InviteCodeCardProps {
   inviteCode: string;

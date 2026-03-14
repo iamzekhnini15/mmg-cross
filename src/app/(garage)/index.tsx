@@ -1,7 +1,7 @@
-import { Text, View, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 
 export default function GarageChoiceScreen() {
   const router = useRouter();

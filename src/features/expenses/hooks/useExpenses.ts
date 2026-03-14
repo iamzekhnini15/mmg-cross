@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { ALL_EXPENSES_KEY } from '@/features/dashboard/hooks/useAllExpenses';
+import { supabase } from '@/lib/supabase';
 import type { Expense, ExpenseInsert, ExpenseUpdate } from '@/types/database';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 function expensesKey(vehicleId: string) {
   return ['expenses', vehicleId] as const;

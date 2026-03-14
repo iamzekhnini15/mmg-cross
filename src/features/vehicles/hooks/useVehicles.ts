@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import type { Vehicle, VehicleInsert, VehicleUpdate, VehicleStatusHistory } from '@/types/database';
 import type { VehicleStatus } from '@/lib/constants';
+import { supabase } from '@/lib/supabase';
 import { useGarageStore } from '@/stores/garageStore';
+import type { Vehicle, VehicleInsert, VehicleStatusHistory, VehicleUpdate } from '@/types/database';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const VEHICLES_KEY = ['vehicles'] as const;
 

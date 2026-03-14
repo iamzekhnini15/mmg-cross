@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { ALL_SALES_KEY } from '@/features/dashboard/hooks/useAllSales';
+import { supabase } from '@/lib/supabase';
 import type { Sale, SaleInsert } from '@/types/database';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 function saleKey(vehicleId: string) {
   return ['sales', vehicleId] as const;

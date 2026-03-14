@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Text, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Input, Select, Card, ResultModal } from '@/components/ui';
+import { Button, Card, Input, ResultModal, Select } from '@/components/ui';
 import { useCreateVehicle } from '@/features/vehicles/hooks/useVehicles';
 import { vehicleFormSchema, type VehicleFormData } from '@/features/vehicles/schemas/vehicleForm';
-import { FUEL_TYPE_LABELS, TRANSMISSION_LABELS, SELLER_TYPE_LABELS } from '@/lib/constants';
+import { FUEL_TYPE_LABELS, SELLER_TYPE_LABELS, TRANSMISSION_LABELS } from '@/lib/constants';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 
 const fuelOptions = Object.entries(FUEL_TYPE_LABELS).map(([value, label]) => ({
   value,

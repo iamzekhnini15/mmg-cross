@@ -1,17 +1,17 @@
-import { Text, View, ScrollView, RefreshControl } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/hooks/useAuth';
-import { useGarageStore } from '@/stores/garageStore';
-import { useCurrentGarageDetails } from '@/features/garages/hooks/useGarages';
+import { LoadingSpinner } from '@/components/ui';
+import { InviteCodeCard } from '@/features/garages/components/InviteCodeCard';
+import { MemberCard } from '@/features/garages/components/MemberCard';
 import {
   useGarageMembers,
-  useUpdateMemberStatus,
-  useUpdateMemberRole,
   useRemoveMember,
+  useUpdateMemberRole,
+  useUpdateMemberStatus,
 } from '@/features/garages/hooks/useGarageMembers';
-import { MemberCard } from '@/features/garages/components/MemberCard';
-import { InviteCodeCard } from '@/features/garages/components/InviteCodeCard';
-import { LoadingSpinner } from '@/components/ui';
+import { useCurrentGarageDetails } from '@/features/garages/hooks/useGarages';
+import { useAuth } from '@/hooks/useAuth';
+import { useGarageStore } from '@/stores/garageStore';
+import { Ionicons } from '@expo/vector-icons';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 export default function GarageScreen() {
   const { user } = useAuth();

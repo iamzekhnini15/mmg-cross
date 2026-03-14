@@ -1,21 +1,21 @@
-import { useRef, useState } from 'react';
-import { Text, View, ScrollView, Platform } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
+import { Button, Card, Input, ResultModal, Select } from '@/components/ui';
+import { generateInvoiceNumber, useCreateSale } from '@/features/sales/hooks/useSales';
+import { saleFormSchema, type SaleFormData } from '@/features/sales/schemas/saleForm';
+import {
+  CIVILITY_LABELS,
+  CLIENT_TYPE_LABELS,
+  PAYMENT_METHOD_LABELS,
+  WARRANTY_LABELS,
+} from '@/lib/constants';
+import { generateInvoiceHtml } from '@/lib/pdf/invoiceTemplate';
+import { useGarageStore } from '@/stores/garageStore';
+import type { Vehicle } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Button, Input, Select, Card, ResultModal } from '@/components/ui';
-import { useCreateSale, generateInvoiceNumber } from '@/features/sales/hooks/useSales';
-import { saleFormSchema, type SaleFormData } from '@/features/sales/schemas/saleForm';
-import { generateInvoiceHtml } from '@/lib/pdf/invoiceTemplate';
-import { useGarageStore } from '@/stores/garageStore';
-import {
-  PAYMENT_METHOD_LABELS,
-  WARRANTY_LABELS,
-  CLIENT_TYPE_LABELS,
-  CIVILITY_LABELS,
-} from '@/lib/constants';
-import type { Vehicle } from '@/types/database';
+import { useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Platform, ScrollView, Text, View } from 'react-native';
 
 const paymentOptions = Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => ({
   value,

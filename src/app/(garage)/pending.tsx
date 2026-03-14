@@ -1,9 +1,9 @@
-import { Text, View, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
-import { useGarageStore } from '@/stores/garageStore';
 import { supabase } from '@/lib/supabase';
+import { useGarageStore } from '@/stores/garageStore';
 import type { Garage, GarageMember } from '@/types/database';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, Text, View } from 'react-native';
 
 export default function PendingScreen() {
   const { signOut, user } = useAuth();

@@ -1,5 +1,5 @@
-import { Modal, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Modal, Pressable, Text, View } from 'react-native';
 import { Button } from './Button';
 
 interface ResultAction {

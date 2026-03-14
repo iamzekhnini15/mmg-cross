@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { Text, View, Pressable, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui';
-import { garageFormSchema, type GarageFormData } from '@/features/garages/schemas/garageForm';
 import { useCreateGarage } from '@/features/garages/hooks/useGarages';
+import { garageFormSchema, type GarageFormData } from '@/features/garages/schemas/garageForm';
+import { Ionicons } from '@expo/vector-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 export default function CreateGarageScreen() {
   const router = useRouter();

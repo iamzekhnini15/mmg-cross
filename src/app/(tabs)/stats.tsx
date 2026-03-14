@@ -1,9 +1,9 @@
-import { ScrollView, RefreshControl, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { LoadingSpinner } from '@/components/ui';
-import { useStats } from '@/features/dashboard/hooks/useStats';
 import { StatCard } from '@/features/dashboard/components/StatCard';
-import { formatPrice, formatDays } from '@/lib/formatters';
+import { useStats } from '@/features/dashboard/hooks/useStats';
+import { formatDays, formatPrice } from '@/lib/formatters';
+import { Ionicons } from '@expo/vector-icons';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 export default function StatsScreen() {
   const { stats, isLoading, isRefetching, error, refetch } = useStats();

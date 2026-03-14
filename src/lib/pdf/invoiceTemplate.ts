@@ -1,17 +1,17 @@
-import type { Vehicle, Garage } from '@/types/database';
 import type { SaleFormData } from '@/features/sales/schemas/saleForm';
 import {
-  FUEL_TYPE_LABELS,
-  TRANSMISSION_LABELS,
-  PAYMENT_METHOD_LABELS,
-  WARRANTY_LABELS,
   CIVILITY_LABELS,
-  type FuelType,
-  type TransmissionType,
-  type PaymentMethod,
-  type WarrantyOption,
+  FUEL_TYPE_LABELS,
+  PAYMENT_METHOD_LABELS,
+  TRANSMISSION_LABELS,
+  WARRANTY_LABELS,
   type Civility,
+  type FuelType,
+  type PaymentMethod,
+  type TransmissionType,
+  type WarrantyOption,
 } from '@/lib/constants';
+import type { Garage, Vehicle } from '@/types/database';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', {
