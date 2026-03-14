@@ -221,3 +221,35 @@ export const CIVILITY_LABELS: Record<Civility, string> = {
 // ─── Default VAT Rate ────────────────────────────────
 
 export const DEFAULT_VAT_RATE = 20.0;
+
+// ─── Garage Roles ───────────────────────────────────
+
+export const GARAGE_ROLES = {
+  OWNER: 'owner',
+  ADMIN: 'admin',
+  MEMBER: 'member',
+} as const;
+
+export type GarageRole = (typeof GARAGE_ROLES)[keyof typeof GARAGE_ROLES];
+
+export const GARAGE_ROLE_LABELS: Record<GarageRole, string> = {
+  [GARAGE_ROLES.OWNER]: 'Propriétaire',
+  [GARAGE_ROLES.ADMIN]: 'Administrateur',
+  [GARAGE_ROLES.MEMBER]: 'Membre',
+};
+
+// ─── Member Statuses ────────────────────────────────
+
+export const MEMBER_STATUSES = {
+  PENDING: 'pending',
+  ACTIVE: 'active',
+  REJECTED: 'rejected',
+} as const;
+
+export type MemberStatus = (typeof MEMBER_STATUSES)[keyof typeof MEMBER_STATUSES];
+
+export const MEMBER_STATUS_LABELS: Record<MemberStatus, string> = {
+  [MEMBER_STATUSES.PENDING]: 'En attente',
+  [MEMBER_STATUSES.ACTIVE]: 'Actif',
+  [MEMBER_STATUSES.REJECTED]: 'Refusé',
+};

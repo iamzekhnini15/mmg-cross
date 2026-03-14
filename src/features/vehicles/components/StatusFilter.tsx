@@ -1,4 +1,4 @@
-import { ScrollView, Pressable, Text } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
 import { VEHICLE_STATUS_ORDER, STATUS_LABELS, type VehicleStatus } from '@/lib/constants';
 
 interface StatusFilterProps {
@@ -9,11 +9,7 @@ interface StatusFilterProps {
 
 export function StatusFilter({ selected, onSelect, counts }: StatusFilterProps) {
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerClassName="px-4 py-3 gap-2"
-    >
+    <View className="flex-row flex-wrap px-4 py-3 gap-2">
       <Pressable
         className={`px-4 py-2 rounded-full ${selected === null ? 'bg-accent' : 'bg-surface-light'}`}
         onPress={() => onSelect(null)}
@@ -51,6 +47,6 @@ export function StatusFilter({ selected, onSelect, counts }: StatusFilterProps) 
           </Text>
         </Pressable>
       ))}
-    </ScrollView>
+    </View>
   );
 }

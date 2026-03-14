@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Media, MediaInsert } from '@/types/database';
+import { useGarageStore } from '@/stores/garageStore';
 
 function mediaKey(vehicleId: string) {
   return ['media', vehicleId] as const;
@@ -21,7 +22,7 @@ export function useMedia(vehicleId: string) {
       if (error) throw error;
       return (data ?? []) as Media[];
     },
-    enabled: !!vehicleId,
+    enabled: !!vehicleId && vehicleId !== 'undefined',
   });
 }
 
@@ -58,13 +59,11 @@ export function useUploadPhoto() {
       uri: string;
       category: string;
     }): Promise<Media> => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non authentifié');
+      const garage = useGarageStore.getState().currentGarage;
+      if (!garage) throw new Error('Aucun garage sélectionné');
 
       const fileName = `${Date.now()}.jpg`;
-      const filePath = `${user.id}/${vehicleId}/${fileName}`;
+      const filePath = `${garage.id}/${vehicleId}/${fileName}`;
 
       // Fetch the image as a blob
       const response = await fetch(uri);
@@ -100,6 +99,7 @@ export function useUploadPhoto() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: mediaKey(variables.vehicleId) });
+      queryClient.invalidateQueries({ queryKey: ['media', 'thumbnails'] });
     },
   });
 }
@@ -123,12 +123,10 @@ export function useUploadDocument() {
       mimeType: string;
       fileSize: number;
     }): Promise<Media> => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non authentifié');
+      const garage = useGarageStore.getState().currentGarage;
+      if (!garage) throw new Error('Aucun garage sélectionné');
 
-      const filePath = `${user.id}/${vehicleId}/${Date.now()}_${fileName}`;
+      const filePath = `${garage.id}/${vehicleId}/${Date.now()}_${fileName}`;
 
       const response = await fetch(uri);
       const blob = await response.blob();
@@ -187,6 +185,7 @@ export function useDeleteMedia() {
       queryClient.invalidateQueries({
         queryKey: mediaKey(variables.media.vehicle_id),
       });
+      queryClient.invalidateQueries({ queryKey: ['media', 'thumbnails'] });
     },
   });
 }

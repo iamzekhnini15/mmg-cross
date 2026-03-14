@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Text, View, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Input, Select, Card } from '@/components/ui';
+import { Button, Input, Select, Card, ResultModal } from '@/components/ui';
 import { useCreateVehicle } from '@/features/vehicles/hooks/useVehicles';
 import { vehicleFormSchema, type VehicleFormData } from '@/features/vehicles/schemas/vehicleForm';
 import { FUEL_TYPE_LABELS, TRANSMISSION_LABELS, SELLER_TYPE_LABELS } from '@/lib/constants';
@@ -33,6 +33,11 @@ export function VehicleForm() {
   const router = useRouter();
   const createVehicle = useCreateVehicle();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [resultModal, setResultModal] = useState<{
+    visible: boolean;
+    type: 'success' | 'error';
+    message: string;
+  }>({ visible: false, type: 'success', message: '' });
 
   const {
     control,
@@ -84,13 +89,19 @@ export function VehicleForm() {
         notes: data.notes || null,
         status: data.status,
       });
-      Alert.alert('Succès', 'Le véhicule a été ajouté avec succès.', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)/vehicles') },
-      ]);
+      setResultModal({
+        visible: true,
+        type: 'success',
+        message: `${data.brand} ${data.model} a été ajouté avec succès.`,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erreur lors de l'ajout du véhicule";
       setSubmitError(message);
-      Alert.alert('Erreur', message);
+      setResultModal({
+        visible: true,
+        type: 'error',
+        message,
+      });
     }
   });
 
@@ -426,6 +437,34 @@ export function VehicleForm() {
 
         <View className="h-8" />
       </ScrollView>
+
+      <ResultModal
+        visible={resultModal.visible}
+        type={resultModal.type}
+        title={resultModal.type === 'success' ? 'Vehicule ajouté' : 'Erreur'}
+        message={resultModal.message}
+        onClose={() => {
+          setResultModal((prev) => ({ ...prev, visible: false }));
+          if (resultModal.type === 'success') {
+            router.replace('/(tabs)/vehicles');
+          }
+        }}
+        actions={
+          resultModal.type === 'success'
+            ? [
+                {
+                  label: 'Voir mes véhicules',
+                  onPress: () => router.replace('/(tabs)/vehicles'),
+                },
+              ]
+            : [
+                {
+                  label: 'Réessayer',
+                  onPress: () => setResultModal((prev) => ({ ...prev, visible: false })),
+                },
+              ]
+        }
+      />
     </KeyboardAvoidingView>
   );
 }

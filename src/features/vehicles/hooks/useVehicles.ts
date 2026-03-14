@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Vehicle, VehicleInsert, VehicleUpdate, VehicleStatusHistory } from '@/types/database';
 import type { VehicleStatus } from '@/lib/constants';
+import { useGarageStore } from '@/stores/garageStore';
 
 const VEHICLES_KEY = ['vehicles'] as const;
 
@@ -56,7 +57,7 @@ export function useVehicle(id: string) {
       if (error) throw error;
       return data as Vehicle;
     },
-    enabled: !!id,
+    enabled: !!id && id !== 'undefined',
   });
 }
 
@@ -90,7 +91,7 @@ export function useVehicleWithExpenses(id: string) {
         costPrice: Number(vehicle.purchase_price) + totalExpenses,
       };
     },
-    enabled: !!id,
+    enabled: !!id && id !== 'undefined',
   });
 }
 
@@ -101,14 +102,12 @@ export function useCreateVehicle() {
 
   return useMutation({
     mutationFn: async (vehicle: VehicleInsert): Promise<Vehicle> => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Utilisateur non authentifié');
+      const garage = useGarageStore.getState().currentGarage;
+      if (!garage) throw new Error('Aucun garage sélectionné');
 
       const { data, error } = await supabase
         .from('vehicles')
-        .insert({ ...vehicle, user_id: user.id } as unknown as Record<string, unknown>)
+        .insert({ ...vehicle, garage_id: garage.id } as unknown as Record<string, unknown>)
         .select()
         .single();
 
@@ -257,6 +256,6 @@ export function useVehicleStatusHistory(vehicleId: string) {
       if (error) throw error;
       return (data ?? []) as VehicleStatusHistory[];
     },
-    enabled: !!vehicleId,
+    enabled: !!vehicleId && vehicleId !== 'undefined',
   });
 }

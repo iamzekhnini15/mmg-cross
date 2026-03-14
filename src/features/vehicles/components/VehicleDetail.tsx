@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Text, View, ScrollView, Alert, Pressable } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Text, View, ScrollView, Alert, Pressable, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Card, StatusBadge, LoadingSpinner, Button } from '@/components/ui';
@@ -8,6 +8,8 @@ import { StatusHistory } from '@/features/vehicles/components/StatusHistory';
 import { ExpenseList } from '@/features/expenses/components/ExpenseList';
 import { PhotoGallery } from '@/features/media/components/PhotoGallery';
 import { DocumentList } from '@/features/media/components/DocumentList';
+import { SaleForm } from '@/features/sales/components/SaleForm';
+import { useSale } from '@/features/sales/hooks/useSales';
 import {
   useVehicleWithExpenses,
   useChangeVehicleStatus,
@@ -18,10 +20,14 @@ import {
   TRANSMISSION_LABELS,
   SELLER_TYPE_LABELS,
   STATUS_LABELS,
+  PAYMENT_METHOD_LABELS,
+  WARRANTY_LABELS,
   type VehicleStatus,
   type FuelType,
   type TransmissionType,
   type SellerType,
+  type PaymentMethod,
+  type WarrantyOption,
 } from '@/lib/constants';
 
 function formatPrice(price: number): string {
@@ -60,11 +66,14 @@ function InfoRow({ label, value }: InfoRowProps) {
 }
 
 export function VehicleDetail() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id: string }>();
+  const id = typeof params.id === 'string' && params.id !== 'undefined' ? params.id : undefined;
   const router = useRouter();
-  const { data, isLoading, error } = useVehicleWithExpenses(id);
+  const { data, isLoading, error } = useVehicleWithExpenses(id ?? '');
   const changeStatus = useChangeVehicleStatus();
   const deleteVehicle = useDeleteVehicle();
+  const { data: existingSale } = useSale(id ?? '');
+  const [showSaleForm, setShowSaleForm] = useState(false);
 
   const vehicle = data?.vehicle;
   const totalExpenses = data?.totalExpenses ?? 0;
@@ -120,6 +129,21 @@ export function VehicleDetail() {
       ],
     );
   }, [vehicle, deleteVehicle, router]);
+
+  if (!id) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center px-6">
+        <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+        <Text className="text-text-primary text-lg font-semibold mt-4 mb-2">
+          Véhicule introuvable
+        </Text>
+        <Text className="text-text-muted text-center mb-4">Identifiant de véhicule invalide.</Text>
+        <Button onPress={() => router.back()} variant="secondary" accessibilityLabel="Retour">
+          Retour
+        </Button>
+      </View>
+    );
+  }
 
   if (isLoading) {
     return <LoadingSpinner fullScreen />;
@@ -267,9 +291,80 @@ export function VehicleDetail() {
         {/* ── Documents ── */}
         <DocumentList vehicleId={vehicle.id} />
 
+        {/* ── Vente ── */}
+        {existingSale ? (
+          <Card className="mb-4">
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+              <Text className="text-text-primary text-lg font-semibold ml-2">Véhicule vendu</Text>
+            </View>
+            <InfoRow label="Facture" value={existingSale.invoice_number} />
+            <InfoRow label="Prix de vente" value={formatPrice(Number(existingSale.sale_price))} />
+            <InfoRow
+              label="Client"
+              value={`${existingSale.client_firstname} ${existingSale.client_lastname}`}
+            />
+            <InfoRow label="Date de vente" value={formatDate(existingSale.sale_date)} />
+            <InfoRow
+              label="Mode de paiement"
+              value={
+                PAYMENT_METHOD_LABELS[existingSale.payment_method as PaymentMethod] ??
+                existingSale.payment_method
+              }
+            />
+            <InfoRow
+              label="Garantie"
+              value={
+                WARRANTY_LABELS[existingSale.warranty as WarrantyOption] ?? existingSale.warranty
+              }
+            />
+            {existingSale.mileage_at_sale ? (
+              <InfoRow label="Km à la vente" value={formatMileage(existingSale.mileage_at_sale)} />
+            ) : null}
+            <View className="mt-3">
+              <Text className="text-green-400 text-sm font-semibold">
+                Marge : {formatPrice(Number(existingSale.sale_price) - costPrice)}
+              </Text>
+            </View>
+          </Card>
+        ) : vehicle.status !== 'sold' ? (
+          <Card className="mb-4">
+            <Button onPress={() => setShowSaleForm(true)} accessibilityLabel="Vendre ce véhicule">
+              Vendre ce véhicule
+            </Button>
+          </Card>
+        ) : null}
+
         {/* ── Historique des statuts ── */}
         <StatusHistory vehicleId={vehicle.id} />
       </ScrollView>
+
+      {/* ── Modal vente ── */}
+      <Modal
+        visible={showSaleForm}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowSaleForm(false)}
+      >
+        <View className="flex-1 bg-background">
+          <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
+            <Text className="text-text-primary text-xl font-bold">Vendre ce véhicule</Text>
+            <Pressable
+              onPress={() => setShowSaleForm(false)}
+              className="p-2"
+              accessibilityLabel="Fermer"
+            >
+              <Ionicons name="close" size={24} color="#9CA3AF" />
+            </Pressable>
+          </View>
+          <SaleForm
+            vehicle={vehicle}
+            costPrice={costPrice}
+            onSuccess={() => setShowSaleForm(false)}
+            onCancel={() => setShowSaleForm(false)}
+          />
+        </View>
+      </Modal>
     </>
   );
 }

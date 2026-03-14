@@ -1,6 +1,18 @@
 export interface Database {
   public: {
     Tables: {
+      garages: {
+        Row: Garage;
+        Insert: GarageInsert;
+        Update: GarageUpdate;
+        Relationships: [];
+      };
+      garage_members: {
+        Row: GarageMember;
+        Insert: GarageMemberInsert;
+        Update: GarageMemberUpdate;
+        Relationships: [];
+      };
       vehicles: {
         Row: Vehicle;
         Insert: VehicleInsert;
@@ -38,11 +50,87 @@ export interface Database {
   };
 }
 
+// ─── Garages ─────────────────────────────────────────
+
+export interface Garage {
+  id: string;
+  name: string;
+  address: string | null;
+  siret: string | null;
+  phone: string | null;
+  email: string | null;
+  invite_code: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GarageInsert {
+  id?: string;
+  name: string;
+  address?: string | null;
+  siret?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  invite_code?: string;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface GarageUpdate {
+  id?: string;
+  name?: string;
+  address?: string | null;
+  siret?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  invite_code?: string;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// ─── Garage Members ─────────────────────────────────
+
+export interface GarageMember {
+  id: string;
+  garage_id: string;
+  user_id: string;
+  user_email: string | null;
+  role: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GarageMemberInsert {
+  id?: string;
+  garage_id: string;
+  user_id: string;
+  user_email?: string | null;
+  role?: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface GarageMemberUpdate {
+  id?: string;
+  garage_id?: string;
+  user_id?: string;
+  user_email?: string | null;
+  role?: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // ─── Vehicles ────────────────────────────────────────
 
 export interface Vehicle {
   id: string;
-  user_id: string;
+  garage_id: string;
   brand: string;
   model: string;
   version: string | null;
@@ -67,7 +155,7 @@ export interface Vehicle {
 
 export interface VehicleInsert {
   id?: string;
-  user_id?: string;
+  garage_id?: string;
   brand: string;
   model: string;
   version?: string | null;
@@ -92,7 +180,7 @@ export interface VehicleInsert {
 
 export interface VehicleUpdate {
   id?: string;
-  user_id?: string;
+  garage_id?: string;
   brand?: string;
   model?: string;
   version?: string | null;

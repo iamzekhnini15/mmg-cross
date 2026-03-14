@@ -1,26 +1,69 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
-import { Button, Card } from '@/components/ui';
+import { useGarageStore } from '@/stores/garageStore';
+import { LoadingSpinner } from '@/components/ui';
+import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
+import { KanbanBoard } from '@/features/dashboard/components/KanbanBoard';
 
 export default function DashboardScreen() {
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
+  const garageName = useGarageStore((state) => state.currentGarage?.name);
+  const router = useRouter();
+  const { columns, isLoading, isRefetching, error, refetch } = useDashboardData();
+
+  const handleVehiclePress = (vehicleId: string) => {
+    router.push(`/(tabs)/vehicles/${vehicleId}`);
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center px-6">
+        <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+        <Text className="text-text-primary text-lg font-semibold mt-4 mb-2">
+          Erreur de chargement
+        </Text>
+        <Text className="text-text-muted text-center">
+          Impossible de charger le tableau de bord.
+        </Text>
+      </View>
+    );
+  }
+
+  const totalStock = columns.reduce((sum, col) => sum + col.count, 0);
 
   return (
-    <View className="flex-1 bg-background px-4 pt-4">
-      <Card>
-        <Text className="text-text-primary text-lg font-semibold mb-2">
-          Bienvenue sur ManageMyGarage
-        </Text>
-        <Text className="text-text-secondary text-sm mb-1">
-          Connecté en tant que : {user?.email ?? 'N/A'}
-        </Text>
-        <Text className="text-text-muted text-xs mb-4">
-          Le dashboard avec vue Kanban sera disponible en Phase 5.
-        </Text>
-        <Button variant="destructive" onPress={signOut} accessibilityLabel="Se déconnecter">
-          Se déconnecter
-        </Button>
-      </Card>
+    <View className="flex-1 bg-background">
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 pt-2 pb-3">
+        <View>
+          <Text className="text-text-primary text-lg font-bold">Tableau de bord</Text>
+          <Text className="text-text-muted text-xs">
+            {totalStock} vehicule(s) · {garageName ?? ''}
+          </Text>
+        </View>
+        <Pressable
+          onPress={signOut}
+          accessibilityLabel="Se deconnecter"
+          accessibilityRole="button"
+          className="w-10 h-10 rounded-full bg-surface-light items-center justify-center border border-border"
+        >
+          <Ionicons name="log-out-outline" size={20} color="#9CA3AF" />
+        </Pressable>
+      </View>
+
+      {/* Kanban Board */}
+      <KanbanBoard
+        columns={columns}
+        onVehiclePress={handleVehiclePress}
+        isRefetching={isRefetching}
+        onRefresh={refetch}
+      />
     </View>
   );
 }

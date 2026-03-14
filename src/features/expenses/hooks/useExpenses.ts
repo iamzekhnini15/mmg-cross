@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { ALL_EXPENSES_KEY } from '@/features/dashboard/hooks/useAllExpenses';
 import type { Expense, ExpenseInsert, ExpenseUpdate } from '@/types/database';
 
 function expensesKey(vehicleId: string) {
@@ -21,7 +22,7 @@ export function useExpenses(vehicleId: string) {
       if (error) throw error;
       return (data ?? []) as Expense[];
     },
-    enabled: !!vehicleId,
+    enabled: !!vehicleId && vehicleId !== 'undefined',
   });
 }
 
@@ -44,6 +45,7 @@ export function useCreateExpense() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: expensesKey(variables.vehicle_id) });
       queryClient.invalidateQueries({ queryKey: ['vehicles', variables.vehicle_id] });
+      queryClient.invalidateQueries({ queryKey: ALL_EXPENSES_KEY });
     },
   });
 }
@@ -76,6 +78,7 @@ export function useUpdateExpense() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: expensesKey(variables.vehicleId) });
       queryClient.invalidateQueries({ queryKey: ['vehicles', variables.vehicleId] });
+      queryClient.invalidateQueries({ queryKey: ALL_EXPENSES_KEY });
     },
   });
 }
@@ -93,6 +96,7 @@ export function useDeleteExpense() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: expensesKey(variables.vehicleId) });
       queryClient.invalidateQueries({ queryKey: ['vehicles', variables.vehicleId] });
+      queryClient.invalidateQueries({ queryKey: ALL_EXPENSES_KEY });
     },
   });
 }

@@ -1,16 +1,15 @@
-import { Redirect } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useGarageStore } from '@/stores/garageStore';
 import { LoadingSpinner } from '@/components/ui';
 
-export default function Index() {
+export default function GarageLayout() {
   const isLoading = useAuthStore((state) => state.isLoading);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isGarageLoading = useGarageStore((state) => state.isGarageLoading);
   const hasActiveGarage = useGarageStore((state) => state.hasActiveGarage);
-  const isPending = useGarageStore((state) => state.isPending);
 
-  if (isLoading) {
+  if (isLoading || isGarageLoading) {
     return <LoadingSpinner fullScreen />;
   }
 
@@ -18,17 +17,17 @@ export default function Index() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  if (isGarageLoading) {
-    return <LoadingSpinner fullScreen />;
+  if (hasActiveGarage) {
+    return <Redirect href="/(tabs)" />;
   }
 
-  if (isPending) {
-    return <Redirect href={'/(garage)/pending' as never} />;
-  }
-
-  if (!hasActiveGarage) {
-    return <Redirect href={'/(garage)' as never} />;
-  }
-
-  return <Redirect href="/(tabs)" />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: '#0F0F10' },
+        animation: 'fade',
+      }}
+    />
+  );
 }

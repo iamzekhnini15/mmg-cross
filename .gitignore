@@ -38,6 +38,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# legacy eslint config (project uses eslint.config.js flat config)
+.eslintrc.js
+
 # generated native folders
 /ios
 /android

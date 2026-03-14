@@ -1,18 +1,25 @@
 import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
+import { useGarageStore } from '@/stores/garageStore';
 import { LoadingSpinner } from '@/components/ui';
 
 export default function TabsLayout() {
   const isLoading = useAuthStore((state) => state.isLoading);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isGarageLoading = useGarageStore((state) => state.isGarageLoading);
+  const hasActiveGarage = useGarageStore((state) => state.hasActiveGarage);
 
-  if (isLoading) {
+  if (isLoading || isGarageLoading) {
     return <LoadingSpinner fullScreen />;
   }
 
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
+  }
+
+  if (!hasActiveGarage) {
+    return <Redirect href={'/(garage)' as never} />;
   }
 
   return (
@@ -62,6 +69,17 @@ export default function TabsLayout() {
             <Ionicons name="stats-chart-outline" size={size} color={color} />
           ),
           tabBarAccessibilityLabel: 'Statistiques',
+        }}
+      />
+      <Tabs.Screen
+        name="garage"
+        options={{
+          title: 'Garage',
+          tabBarLabel: 'Garage',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="business-outline" size={size} color={color} />
+          ),
+          tabBarAccessibilityLabel: 'Garage',
         }}
       />
     </Tabs>
