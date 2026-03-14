@@ -1,4 +1,4 @@
-import { Button, Card, LoadingSpinner, StatusBadge } from '@/components/ui';
+import { Button, Card, ConfirmModal, LoadingSpinner, StatusBadge } from '@/components/ui';
 import { ExpenseList } from '@/features/expenses/components/ExpenseList';
 import { DocumentList } from '@/features/media/components/DocumentList';
 import { PhotoGallery } from '@/features/media/components/PhotoGallery';
@@ -15,7 +15,6 @@ import {
   FUEL_TYPE_LABELS,
   PAYMENT_METHOD_LABELS,
   SELLER_TYPE_LABELS,
-  STATUS_LABELS,
   TRANSMISSION_LABELS,
   WARRANTY_LABELS,
   type FuelType,
@@ -28,7 +27,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -74,6 +73,7 @@ export function VehicleDetail() {
   const deleteVehicle = useDeleteVehicle();
   const { data: existingSale } = useSale(id ?? '');
   const [showSaleForm, setShowSaleForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const vehicle = data?.vehicle;
   const totalExpenses = data?.totalExpenses ?? 0;
@@ -83,51 +83,23 @@ export function VehicleDetail() {
     (newStatus: VehicleStatus) => {
       if (!vehicle) return;
 
-      const currentLabel = STATUS_LABELS[vehicle.status as VehicleStatus];
-      const newLabel = STATUS_LABELS[newStatus];
-
-      Alert.alert('Changer le statut', `Passer de "${currentLabel}" à "${newLabel}" ?`, [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Confirmer',
-          onPress: () => {
-            changeStatus.mutate({
-              id: vehicle.id,
-              fromStatus: vehicle.status as VehicleStatus,
-              toStatus: newStatus,
-            });
-          },
-        },
-      ]);
+      changeStatus.mutate({
+        id: vehicle.id,
+        fromStatus: vehicle.status as VehicleStatus,
+        toStatus: newStatus,
+      });
     },
     [vehicle, changeStatus],
   );
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!vehicle) return;
-
-    Alert.alert(
-      'Supprimer le véhicule',
-      `Voulez-vous vraiment supprimer ${vehicle.brand} ${vehicle.model} ? Cette action est irréversible.`,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteVehicle.mutateAsync(vehicle.id);
-              router.back();
-            } catch (err) {
-              Alert.alert(
-                'Erreur',
-                err instanceof Error ? err.message : 'Impossible de supprimer le véhicule',
-              );
-            }
-          },
-        },
-      ],
-    );
+    try {
+      await deleteVehicle.mutateAsync(vehicle.id);
+      router.back();
+    } catch {
+      // Error handled by mutation
+    }
   }, [vehicle, deleteVehicle, router]);
 
   if (!id) {
@@ -173,7 +145,7 @@ export function VehicleDetail() {
           title: `${vehicle.brand} ${vehicle.model}`,
           headerRight: () => (
             <Pressable
-              onPress={handleDelete}
+              onPress={() => setShowDeleteConfirm(true)}
               className="mr-2"
               accessibilityLabel="Supprimer le véhicule"
             >
@@ -365,6 +337,18 @@ export function VehicleDetail() {
           />
         </View>
       </Modal>
+
+      {/* ── Modal confirmation suppression ── */}
+      <ConfirmModal
+        visible={showDeleteConfirm}
+        title="Supprimer le véhicule"
+        message={`Voulez-vous vraiment supprimer ${vehicle.brand} ${vehicle.model} ? Cette action est irréversible.`}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          handleDelete();
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </>
   );
 }

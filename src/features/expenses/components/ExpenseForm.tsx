@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Text, View, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Input, Select, Card } from '@/components/ui';
+import { Button, Input, Select, Card, ResultModal } from '@/components/ui';
 import { useCreateExpense } from '@/features/expenses/hooks/useExpenses';
 import { expenseFormSchema, type ExpenseFormData } from '@/features/expenses/schemas/expenseForm';
 import { EXPENSE_CATEGORY_LABELS, PAYMENT_STATUS_LABELS, DEFAULT_VAT_RATE } from '@/lib/constants';
@@ -31,7 +31,7 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps) {
   const createExpense = useCreateExpense();
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const {
     control,
@@ -81,7 +81,6 @@ export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      setSubmitError(null);
       await createExpense.mutateAsync({
         vehicle_id: vehicleId,
         category: data.category,
@@ -94,13 +93,12 @@ export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps
         invoice_ref: data.invoice_ref || null,
         notes: data.notes || null,
       });
-      Alert.alert('Succès', 'Le frais a été ajouté avec succès.', [
-        { text: 'OK', onPress: onSuccess },
-      ]);
+      setResult({ type: 'success', message: 'Le frais a été ajouté avec succès.' });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Erreur lors de l'ajout du frais";
-      setSubmitError(message);
-      Alert.alert('Erreur', message);
+      setResult({
+        type: 'error',
+        message: error instanceof Error ? error.message : "Erreur lors de l'ajout du frais",
+      });
     }
   });
 
@@ -266,8 +264,6 @@ export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps
           />
         </Card>
 
-        {submitError ? <Text className="text-red-500 text-center mb-4">{submitError}</Text> : null}
-
         <View className="flex-row gap-3">
           <View className="flex-1">
             <Button onPress={onCancel} variant="secondary" accessibilityLabel="Annuler">
@@ -285,6 +281,19 @@ export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps
           </View>
         </View>
       </ScrollView>
+
+      <ResultModal
+        visible={result !== null}
+        type={result?.type ?? 'success'}
+        title={result?.type === 'success' ? 'Frais enregistré' : 'Erreur'}
+        message={result?.message ?? ''}
+        actions={
+          result?.type === 'success'
+            ? [{ label: 'Fermer', onPress: onSuccess }]
+            : [{ label: 'Fermer', variant: 'secondary', onPress: () => setResult(null) }]
+        }
+        onClose={result?.type === 'success' ? onSuccess : () => setResult(null)}
+      />
     </KeyboardAvoidingView>
   );
 }

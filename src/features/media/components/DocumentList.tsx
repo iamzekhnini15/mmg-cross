@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
-import { Text, View, Pressable, Alert, Linking, Platform } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Text, View, Pressable, Linking, Platform } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, LoadingSpinner } from '@/components/ui';
+import { Card, ConfirmModal, LoadingSpinner } from '@/components/ui';
 import {
   useDocuments,
   useUploadDocument,
@@ -76,6 +76,7 @@ export function DocumentList({ vehicleId }: DocumentListProps) {
   const { data: documents, isLoading } = useDocuments(vehicleId);
   const uploadDocument = useUploadDocument();
   const deleteMedia = useDeleteMedia();
+  const [deleteTarget, setDeleteTarget] = useState<Media | null>(null);
 
   const handlePickDocument = useCallback(async () => {
     try {
@@ -94,33 +95,20 @@ export function DocumentList({ vehicleId }: DocumentListProps) {
         mimeType: asset.mimeType ?? 'application/pdf',
         fileSize: asset.size ?? 0,
       });
-    } catch (error) {
-      Alert.alert('Erreur', error instanceof Error ? error.message : "Erreur lors de l'upload");
+    } catch {
+      // Error handled by mutation
     }
   }, [vehicleId, uploadDocument]);
 
-  const handleDelete = useCallback(
-    (media: Media) => {
-      Alert.alert('Supprimer ce document', `${media.file_name}`, [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteMedia.mutateAsync({ media });
-            } catch (error) {
-              Alert.alert(
-                'Erreur',
-                error instanceof Error ? error.message : 'Impossible de supprimer',
-              );
-            }
-          },
-        },
-      ]);
-    },
-    [deleteMedia],
-  );
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteMedia.mutateAsync({ media: deleteTarget });
+    } catch {
+      // Error handled by mutation
+    }
+    setDeleteTarget(null);
+  }, [deleteTarget, deleteMedia]);
 
   return (
     <Card className="mb-4">
@@ -145,7 +133,7 @@ export function DocumentList({ vehicleId }: DocumentListProps) {
         </View>
       ) : (
         documents.map((doc) => (
-          <DocumentRow key={doc.id} media={doc} onDelete={() => handleDelete(doc)} />
+          <DocumentRow key={doc.id} media={doc} onDelete={() => setDeleteTarget(doc)} />
         ))
       )}
 
@@ -155,6 +143,14 @@ export function DocumentList({ vehicleId }: DocumentListProps) {
           <Text className="text-text-muted text-sm ml-2">Upload en cours...</Text>
         </View>
       ) : null}
+
+      <ConfirmModal
+        visible={deleteTarget !== null}
+        title="Supprimer ce document"
+        message={deleteTarget?.file_name ?? ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </Card>
   );
 }

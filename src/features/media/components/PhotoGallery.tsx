@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { Text, View, Modal, Pressable, Alert, Image, FlatList, Dimensions } from 'react-native';
+import { Text, View, Modal, Pressable, Image, FlatList, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, LoadingSpinner } from '@/components/ui';
+import { Card, ConfirmModal, LoadingSpinner } from '@/components/ui';
 import {
   usePhotos,
   useUploadPhoto,
@@ -120,9 +120,12 @@ export function PhotoGallery({ vehicleId }: PhotoGalleryProps) {
   const deleteMedia = useDeleteMedia();
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [sourceModalVisible, setSourceModalVisible] = useState(false);
   const [pendingUri, setPendingUri] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Media | null>(null);
 
   const pickImage = useCallback(async (source: 'camera' | 'gallery') => {
+    setSourceModalVisible(false);
     const result =
       source === 'camera'
         ? await ImagePicker.launchCameraAsync({
@@ -154,50 +157,29 @@ export function PhotoGallery({ vehicleId }: PhotoGalleryProps) {
           category,
         });
         setPendingUri(null);
-      } catch (error) {
-        Alert.alert('Erreur', error instanceof Error ? error.message : "Erreur lors de l'upload");
+      } catch {
+        // Error handled by mutation
       }
     },
     [pendingUri, vehicleId, uploadPhoto],
   );
 
-  const handleDelete = useCallback(
-    (media: Media) => {
-      Alert.alert('Supprimer cette photo', 'Cette action est irréversible.', [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteMedia.mutateAsync({ media });
-            } catch (error) {
-              Alert.alert(
-                'Erreur',
-                error instanceof Error ? error.message : 'Impossible de supprimer',
-              );
-            }
-          },
-        },
-      ]);
-    },
-    [deleteMedia],
-  );
-
-  const handleAddPhoto = () => {
-    Alert.alert('Ajouter une photo', 'Choisissez la source', [
-      { text: 'Appareil photo', onPress: () => pickImage('camera') },
-      { text: 'Galerie', onPress: () => pickImage('gallery') },
-      { text: 'Annuler', style: 'cancel' },
-    ]);
-  };
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteMedia.mutateAsync({ media: deleteTarget });
+    } catch {
+      // Error handled by mutation
+    }
+    setDeleteTarget(null);
+  }, [deleteTarget, deleteMedia]);
 
   return (
     <Card className="mb-4">
       <View className="flex-row items-center justify-between mb-3">
         <Text className="text-text-primary text-lg font-semibold">Photos</Text>
         <Pressable
-          onPress={handleAddPhoto}
+          onPress={() => setSourceModalVisible(true)}
           className="flex-row items-center bg-accent/10 rounded-lg px-3 py-1.5"
           accessibilityLabel="Ajouter une photo"
         >
@@ -220,7 +202,7 @@ export function PhotoGallery({ vehicleId }: PhotoGalleryProps) {
               key={photo.id}
               media={photo}
               onPress={() => setSelectedPhotoIndex(index)}
-              onDelete={() => handleDelete(photo)}
+              onDelete={() => setDeleteTarget(photo)}
             />
           ))}
         </View>
@@ -242,6 +224,52 @@ export function PhotoGallery({ vehicleId }: PhotoGalleryProps) {
           onClose={() => setSelectedPhotoIndex(null)}
         />
       ) : null}
+
+      {/* Source selection modal (camera / gallery) */}
+      <Modal
+        visible={sourceModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSourceModalVisible(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/60 justify-end"
+          onPress={() => setSourceModalVisible(false)}
+        >
+          <Pressable className="bg-surface rounded-t-3xl" onPress={(e) => e.stopPropagation()}>
+            <View className="items-center pt-3 pb-2">
+              <View className="w-10 h-1 rounded-full bg-border" />
+            </View>
+            <Text className="text-text-primary text-lg font-semibold px-5 pb-3">
+              Ajouter une photo
+            </Text>
+            <Pressable
+              className="px-5 py-3.5 border-t border-border/50 flex-row items-center gap-3"
+              onPress={() => pickImage('camera')}
+              accessibilityLabel="Appareil photo"
+            >
+              <Ionicons name="camera-outline" size={20} color="#3B82F6" />
+              <Text className="text-text-primary text-base">Appareil photo</Text>
+            </Pressable>
+            <Pressable
+              className="px-5 py-3.5 border-t border-border/50 flex-row items-center gap-3"
+              onPress={() => pickImage('gallery')}
+              accessibilityLabel="Galerie"
+            >
+              <Ionicons name="images-outline" size={20} color="#3B82F6" />
+              <Text className="text-text-primary text-base">Galerie</Text>
+            </Pressable>
+            <Pressable
+              className="px-5 py-3.5 border-t border-border/50 items-center"
+              onPress={() => setSourceModalVisible(false)}
+              accessibilityLabel="Annuler"
+            >
+              <Text className="text-text-muted text-base">Annuler</Text>
+            </Pressable>
+            <View className="h-8" />
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Category selection modal */}
       <Modal
@@ -275,6 +303,15 @@ export function PhotoGallery({ vehicleId }: PhotoGalleryProps) {
           </Pressable>
         </Pressable>
       </Modal>
+
+      {/* Delete confirmation modal */}
+      <ConfirmModal
+        visible={deleteTarget !== null}
+        title="Supprimer cette photo"
+        message="Cette action est irréversible."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </Card>
   );
 }

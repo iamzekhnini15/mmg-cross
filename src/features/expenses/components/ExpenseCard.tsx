@@ -1,6 +1,7 @@
-import { Text, View, Pressable, Alert } from 'react-native';
+import { useState } from 'react';
+import { Text, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Card, Badge } from '@/components/ui';
+import { Card, Badge, ConfirmModal } from '@/components/ui';
 import type { Expense } from '@/types/database';
 import {
   EXPENSE_CATEGORY_LABELS,
@@ -41,23 +42,13 @@ interface ExpenseCardProps {
 }
 
 export function ExpenseCard({ expense, onDelete, onTogglePayment }: ExpenseCardProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const categoryLabel =
     EXPENSE_CATEGORY_LABELS[expense.category as ExpenseCategory] ?? expense.category;
   const paymentLabel =
     PAYMENT_STATUS_LABELS[expense.payment_status as PaymentStatus] ?? expense.payment_status;
   const isPaid = expense.payment_status === 'paid';
   const icon = CATEGORY_ICONS[expense.category] ?? 'ellipsis-horizontal-circle-outline';
-
-  const handleDelete = () => {
-    Alert.alert('Supprimer ce frais', `${categoryLabel} - ${formatPrice(expense.amount_ttc)}`, [
-      { text: 'Annuler', style: 'cancel' },
-      {
-        text: 'Supprimer',
-        style: 'destructive',
-        onPress: () => onDelete(expense.id),
-      },
-    ]);
-  };
 
   return (
     <Card className="mb-3">
@@ -100,7 +91,11 @@ export function ExpenseCard({ expense, onDelete, onTogglePayment }: ExpenseCardP
             </Badge>
           ) : null}
         </View>
-        <Pressable onPress={handleDelete} className="p-2" accessibilityLabel="Supprimer ce frais">
+        <Pressable
+          onPress={() => setShowDeleteConfirm(true)}
+          className="p-2"
+          accessibilityLabel="Supprimer ce frais"
+        >
           <Ionicons name="trash-outline" size={18} color="#EF4444" />
         </Pressable>
       </View>
@@ -108,6 +103,17 @@ export function ExpenseCard({ expense, onDelete, onTogglePayment }: ExpenseCardP
       {expense.notes ? (
         <Text className="text-text-muted text-xs mt-2 italic">{expense.notes}</Text>
       ) : null}
+
+      <ConfirmModal
+        visible={showDeleteConfirm}
+        title="Supprimer ce frais"
+        message={`${categoryLabel} - ${formatPrice(expense.amount_ttc)}`}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          onDelete(expense.id);
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </Card>
   );
 }

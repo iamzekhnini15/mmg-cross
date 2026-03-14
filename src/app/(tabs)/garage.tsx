@@ -1,4 +1,7 @@
-import { LoadingSpinner } from '@/components/ui';
+import { useState } from 'react';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
+
+import { ConfirmModal, LoadingSpinner } from '@/components/ui';
 import { InviteCodeCard } from '@/features/garages/components/InviteCodeCard';
 import { MemberCard } from '@/features/garages/components/MemberCard';
 import {
@@ -11,7 +14,6 @@ import { useCurrentGarageDetails } from '@/features/garages/hooks/useGarages';
 import { useAuth } from '@/hooks/useAuth';
 import { useGarageStore } from '@/stores/garageStore';
 import { Ionicons } from '@expo/vector-icons';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 export default function GarageScreen() {
   const { user } = useAuth();
@@ -25,6 +27,7 @@ export default function GarageScreen() {
   const updateStatus = useUpdateMemberStatus();
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
+  const [removeMemberId, setRemoveMemberId] = useState<string | null>(null);
 
   const isAdmin = currentMembership?.role === 'owner' || currentMembership?.role === 'admin';
 
@@ -133,10 +136,22 @@ export default function GarageScreen() {
             isAdmin={isAdmin}
             currentUserId={user?.id}
             onChangeRole={(id, role) => updateRole.mutate({ memberId: id, role })}
-            onRemove={(id) => removeMember.mutate(id)}
+            onRemove={(id) => setRemoveMemberId(id)}
           />
         ))}
       </View>
+
+      <ConfirmModal
+        visible={removeMemberId !== null}
+        title="Retirer ce membre"
+        message="Voulez-vous vraiment retirer ce membre du garage ?"
+        confirmLabel="Retirer"
+        onConfirm={() => {
+          if (removeMemberId) removeMember.mutate(removeMemberId);
+          setRemoveMemberId(null);
+        }}
+        onCancel={() => setRemoveMemberId(null)}
+      />
     </ScrollView>
   );
 }
