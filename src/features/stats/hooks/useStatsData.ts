@@ -1,8 +1,8 @@
+import { useAllSales } from '@/features/dashboard/hooks/useAllSales';
 import { useVehicles } from '@/features/vehicles/hooks/useVehicles';
 import { VEHICLE_STATUSES } from '@/lib/constants';
 import type { Sale } from '@/types/database';
 import { useMemo } from 'react';
-import { useAllSales } from '@/features/dashboard/hooks/useAllSales';
 import type { PeriodFilter, StatsData } from '../types';
 import { useAllExpensesFull } from './useAllExpensesFull';
 

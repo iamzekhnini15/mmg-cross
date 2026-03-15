@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui';
 import { formatDays, formatPrice } from '@/lib/formatters';
-import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from 'react-native';
 import type { StockKPIs } from '../types';
 import { ChartCard } from './ChartCard';
 import { PipelineBar } from './PipelineBar';

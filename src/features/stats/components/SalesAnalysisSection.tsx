@@ -1,12 +1,12 @@
+import { Card } from '@/components/ui';
 import { formatPrice } from '@/lib/formatters';
-import { LineChart } from 'react-native-gifted-charts';
 import { View } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
 import type { SalesKPIs } from '../types';
 import { ChartCard } from './ChartCard';
 import { DonutChart } from './DonutChart';
 import { SectionHeader } from './SectionHeader';
 import { StatRow } from './StatRow';
-import { Card } from '@/components/ui';
 
 interface SalesAnalysisSectionProps {
   data: SalesKPIs;

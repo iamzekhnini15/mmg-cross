@@ -1,8 +1,8 @@
 import { Card } from '@/components/ui';
 import { formatDays, formatPercentage, formatPrice } from '@/lib/formatters';
-import { LineChart } from 'react-native-gifted-charts';
-import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
 import type { VehicleKPIs } from '../types';
 import { ChartCard } from './ChartCard';
 import { SectionHeader } from './SectionHeader';

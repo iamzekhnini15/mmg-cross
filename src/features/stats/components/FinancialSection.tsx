@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui';
 import { formatCompactPrice, formatPercentage, formatPrice } from '@/lib/formatters';
-import { BarChart } from 'react-native-gifted-charts';
 import { Text, View } from 'react-native';
+import { BarChart } from 'react-native-gifted-charts';
 import type { FinancialKPIs } from '../types';
 import { ChartCard } from './ChartCard';
 import { SectionHeader } from './SectionHeader';

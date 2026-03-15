@@ -1,5 +1,5 @@
-import { BarChart } from 'react-native-gifted-charts';
 import { View } from 'react-native';
+import { BarChart } from 'react-native-gifted-charts';
 import type { VehicleKPIs } from '../types';
 import { ChartCard } from './ChartCard';
 import { DonutChart } from './DonutChart';

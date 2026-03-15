@@ -1,5 +1,5 @@
-import { PieChart } from 'react-native-gifted-charts';
 import { Text, View } from 'react-native';
+import { PieChart } from 'react-native-gifted-charts';
 import type { DonutSegment } from '../types';
 import { LegendItem } from './LegendItem';
 
