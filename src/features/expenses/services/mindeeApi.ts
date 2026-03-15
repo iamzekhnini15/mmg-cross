@@ -1,10 +1,10 @@
+import { DEFAULT_VAT_RATE } from '@/lib/constants';
 import type {
+  InvoiceScanResult,
   MindeeEnqueueResponse,
   MindeeJobResponse,
   MindeeResultResponse,
-  InvoiceScanResult,
 } from '../types/invoiceScan';
-import { DEFAULT_VAT_RATE } from '@/lib/constants';
 
 const MINDEE_BASE_URL = 'https://api-v2.mindee.net';
 const ENQUEUE_URL = `${MINDEE_BASE_URL}/v2/products/extraction/enqueue`;

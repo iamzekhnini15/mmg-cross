@@ -1,18 +1,18 @@
-import { useState, useCallback } from 'react';
-import { Text, View, Modal, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Card, LoadingSpinner } from '@/components/ui';
 import { ExpenseCard } from '@/features/expenses/components/ExpenseCard';
 import { ExpenseForm } from '@/features/expenses/components/ExpenseForm';
 import { InvoiceScanButton } from '@/features/expenses/components/InvoiceScanButton';
 import {
-  useExpensesSummary,
   useDeleteExpense,
+  useExpensesSummary,
   useUpdateExpense,
 } from '@/features/expenses/hooks/useExpenses';
-import { EXPENSE_CATEGORY_LABELS, type ExpenseCategory } from '@/lib/constants';
-import type { InvoiceScanResult } from '@/features/expenses/types/invoiceScan';
 import type { ExpenseFormData } from '@/features/expenses/schemas/expenseForm';
+import type { InvoiceScanResult } from '@/features/expenses/types/invoiceScan';
+import { EXPENSE_CATEGORY_LABELS, type ExpenseCategory } from '@/lib/constants';
+import { Ionicons } from '@expo/vector-icons';
+import { useCallback, useState } from 'react';
+import { Modal, Pressable, Text, View } from 'react-native';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', {

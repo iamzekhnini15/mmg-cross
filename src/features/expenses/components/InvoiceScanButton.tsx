@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { Text, View, Modal, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
 import { useInvoiceScan } from '../hooks/useInvoiceScan';
 import type { InvoiceScanResult } from '../types/invoiceScan';
 
