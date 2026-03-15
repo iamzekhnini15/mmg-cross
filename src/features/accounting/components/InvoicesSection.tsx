@@ -1,9 +1,9 @@
 import { formatDate, formatPrice } from '@/lib/formatters';
+import type { Sale, Vehicle } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import { Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Alert, Pressable, Text, View } from 'react-native';
-import type { Sale, Vehicle } from '@/types/database';
 
 interface InvoicesSectionProps {
   sales: Sale[];
