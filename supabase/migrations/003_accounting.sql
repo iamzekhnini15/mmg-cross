@@ -10,7 +10,10 @@ ALTER TABLE vehicles
     CHECK (vat_regime IN ('margin', 'normal')),
   ADD COLUMN IF NOT EXISTS seller_vat_number TEXT;
 
--- Backfill: derive vat_regime from existing seller_type data
+-- Backfill: derive vat_regime from existing seller_type data.
+-- By Belgian law, buying from a professional (assujetti TVA) always means
+-- normal regime, and buying from a private individual always means margin regime.
+-- Existing records without an explicit seller_type default to 'margin'.
 UPDATE vehicles
 SET vat_regime = CASE WHEN seller_type = 'professional' THEN 'normal' ELSE 'margin' END;
 

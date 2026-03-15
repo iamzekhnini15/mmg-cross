@@ -92,8 +92,7 @@ export function buildPurchaseRows(purchasedVehicles: Vehicle[]): PurchaseSummary
       purchasePrice,
       vatRegime,
       sellerName: v.seller_name,
-      sellerVatNumber:
-        (v as Vehicle & { seller_vat_number?: string | null }).seller_vat_number ?? null,
+      sellerVatNumber: v.seller_vat_number ?? null,
       deductibleVat,
     };
   });

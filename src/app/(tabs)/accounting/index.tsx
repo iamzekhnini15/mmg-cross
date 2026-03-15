@@ -199,7 +199,7 @@ export default function AccountingScreen() {
         {isSubmitted && report?.submitted_at && (
           <Text className="text-green-400 text-xs mt-1">
             Transmis le{' '}
-            {new Date(report.submitted_at).toLocaleDateString('fr-FR', {
+            {new Date(report.submitted_at).toLocaleDateString('fr-BE', {
               day: '2-digit',
               month: 'long',
               year: 'numeric',
