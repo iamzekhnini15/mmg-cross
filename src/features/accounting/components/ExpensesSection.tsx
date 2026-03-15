@@ -31,11 +31,11 @@ export function ExpensesSection({ rows }: ExpensesSectionProps) {
                 <Text className="text-text-primary text-sm font-medium" numberOfLines={1}>
                   {row.vehicleLabel}
                 </Text>
-                <Text className="text-text-tertiary text-xs mt-0.5">
+                <Text className="text-text-muted text-xs mt-0.5">
                   {EXPENSE_CATEGORY_LABELS[row.category as ExpenseCategory] ?? row.category}
                   {row.provider ? ` · ${row.provider}` : ''}
                 </Text>
-                <Text className="text-text-tertiary text-xs">
+                <Text className="text-text-muted text-xs">
                   {formatDate(row.expenseDate, 'short')}
                 </Text>
               </View>
@@ -43,7 +43,7 @@ export function ExpensesSection({ rows }: ExpensesSectionProps) {
                 <Text className="text-text-primary text-sm font-medium">
                   {formatPrice(row.amountTTC)}
                 </Text>
-                <Text className="text-text-tertiary text-xs">
+                <Text className="text-text-muted text-xs">
                   HT: {formatPrice(row.amountHT)} · TVA {row.vatRate}%
                 </Text>
                 <Text className="text-green-400 text-xs font-medium">

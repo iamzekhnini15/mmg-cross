@@ -1,9 +1,7 @@
 import { formatDate, formatPrice } from '@/lib/formatters';
 import type { Sale, Vehicle } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
-import { Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, Text, View } from 'react-native';
 
 interface InvoicesSectionProps {
   sales: Sale[];
@@ -21,7 +19,14 @@ export function InvoicesSection({ sales, vehicleMap }: InvoicesSectionProps) {
       return;
     }
 
+    if (Platform.OS === 'web') {
+      Alert.alert('Non disponible', "Le partage de fichiers PDF n'est pas disponible sur le web.");
+      return;
+    }
+
     try {
+      const { Paths } = await import('expo-file-system');
+      const Sharing = await import('expo-sharing');
       const info = Paths.info(sale.invoice_pdf_path);
       if (!info.exists) {
         Alert.alert('PDF introuvable', 'Le fichier PDF a été supprimé ou déplacé.');
@@ -59,12 +64,12 @@ export function InvoicesSection({ sales, vehicleMap }: InvoicesSectionProps) {
                   <Text className="text-text-primary text-sm font-medium">
                     {sale.invoice_number}
                   </Text>
-                  <Text className="text-text-tertiary text-xs mt-0.5">
+                  <Text className="text-text-muted text-xs mt-0.5">
                     {formatDate(sale.sale_date, 'short')}
                     {' · '}
                     {vehicle ? vehicleLabel(vehicle) : '—'}
                   </Text>
-                  <Text className="text-text-tertiary text-xs">
+                  <Text className="text-text-muted text-xs">
                     {sale.company_name ? `${sale.company_name} · ` : ''}
                     {clientName}
                   </Text>

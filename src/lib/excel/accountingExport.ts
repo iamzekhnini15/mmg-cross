@@ -6,9 +6,8 @@ import type {
 } from '@/features/accounting/types';
 import { EXPENSE_CATEGORY_LABELS, VAT_REGIME_LABELS, type ExpenseCategory } from '@/lib/constants';
 import type { Garage } from '@/types/database';
-import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import * as XLSX from 'xlsx';
+import { Platform } from 'react-native';
 
 interface AccountingExcelData {
   year: number;
@@ -156,16 +155,30 @@ export async function generateAndShareExcel({
   XLSX.utils.book_append_sheet(wb, wsExpenses, 'Frais');
 
   // ─── Write and share ──────────────────────────────
-  const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
   const garageName = garage?.name?.replace(/[^a-zA-Z0-9]/g, '_') ?? 'compta';
   const fileName = `${garageName}_T${quarter}_${year}.xlsx`;
-  const file = new File(Paths.cache, fileName);
 
-  const bytes = Uint8Array.from(atob(wbout), (c) => c.charCodeAt(0));
-  file.write(bytes);
-
-  await Sharing.shareAsync(file.uri, {
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    dialogTitle: `Export comptable T${quarter} ${year}`,
-  });
+  if (Platform.OS === 'web') {
+    const wbout = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    const blob = new Blob([wbout], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  } else {
+    const { File, Paths } = await import('expo-file-system');
+    const { shareAsync } = await import('expo-sharing');
+    const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+    const file = new File(Paths.cache, fileName);
+    const bytes = Uint8Array.from(atob(wbout), (c) => c.charCodeAt(0));
+    file.write(bytes);
+    await shareAsync(file.uri, {
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      dialogTitle: `Export comptable T${quarter} ${year}`,
+    });
+  }
 }
