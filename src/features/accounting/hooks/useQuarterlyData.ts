@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { useGarageStore } from '@/stores/garageStore';
 import type { Expense, Sale, Vehicle } from '@/types/database';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -6,11 +7,9 @@ import { getQuarterRange } from '../types';
 
 // ─── Fetch all vehicles for a garage ─────────────────
 
-export const ALL_VEHICLES_KEY = ['vehicles', 'all'] as const;
-
-function useAllVehicles() {
+function useAllVehicles(garageId: string | undefined) {
   return useQuery({
-    queryKey: ALL_VEHICLES_KEY,
+    queryKey: ['vehicles', 'all', garageId],
     queryFn: async (): Promise<Vehicle[]> => {
       const { data, error } = await supabase
         .from('vehicles')
@@ -19,16 +18,15 @@ function useAllVehicles() {
       if (error) throw error;
       return (data ?? []) as Vehicle[];
     },
+    enabled: !!garageId,
   });
 }
 
 // ─── Fetch all sales for a garage ────────────────────
 
-const ALL_SALES_ACCOUNTING_KEY = ['sales', 'accounting', 'all'] as const;
-
-function useAllSalesAccounting() {
+function useAllSalesAccounting(garageId: string | undefined) {
   return useQuery({
-    queryKey: ALL_SALES_ACCOUNTING_KEY,
+    queryKey: ['sales', 'accounting', 'all', garageId],
     queryFn: async (): Promise<Sale[]> => {
       const { data, error } = await supabase
         .from('sales')
@@ -37,16 +35,15 @@ function useAllSalesAccounting() {
       if (error) throw error;
       return (data ?? []) as Sale[];
     },
+    enabled: !!garageId,
   });
 }
 
 // ─── Fetch all expenses for a garage ─────────────────
 
-const ALL_EXPENSES_ACCOUNTING_KEY = ['expenses', 'accounting', 'all'] as const;
-
-function useAllExpensesAccounting() {
+function useAllExpensesAccounting(garageId: string | undefined) {
   return useQuery({
-    queryKey: ALL_EXPENSES_ACCOUNTING_KEY,
+    queryKey: ['expenses', 'accounting', 'all', garageId],
     queryFn: async (): Promise<Expense[]> => {
       const { data, error } = await supabase
         .from('expenses')
@@ -55,6 +52,7 @@ function useAllExpensesAccounting() {
       if (error) throw error;
       return (data ?? []) as Expense[];
     },
+    enabled: !!garageId,
   });
 }
 
@@ -78,9 +76,10 @@ export interface QuarterlyData {
 }
 
 export function useQuarterlyData(year: number, quarter: 1 | 2 | 3 | 4) {
-  const vehiclesQuery = useAllVehicles();
-  const salesQuery = useAllSalesAccounting();
-  const expensesQuery = useAllExpensesAccounting();
+  const garageId = useGarageStore((s) => s.currentGarage?.id);
+  const vehiclesQuery = useAllVehicles(garageId);
+  const salesQuery = useAllSalesAccounting(garageId);
+  const expensesQuery = useAllExpensesAccounting(garageId);
 
   const isLoading = vehiclesQuery.isLoading || salesQuery.isLoading || expensesQuery.isLoading;
 

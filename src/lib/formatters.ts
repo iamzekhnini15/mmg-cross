@@ -1,5 +1,5 @@
 export function formatPrice(price: number, decimals: 0 | 2 = 0): string {
-  return new Intl.NumberFormat('fr-FR', {
+  return new Intl.NumberFormat('fr-BE', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: decimals,
@@ -8,11 +8,11 @@ export function formatPrice(price: number, decimals: 0 | 2 = 0): string {
 }
 
 export function formatMileage(km: number): string {
-  return new Intl.NumberFormat('fr-FR').format(km) + ' km';
+  return new Intl.NumberFormat('fr-BE').format(km) + ' km';
 }
 
 export function formatDate(dateStr: string, style: 'long' | 'short' = 'long'): string {
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
+  return new Date(dateStr).toLocaleDateString('fr-BE', {
     day: '2-digit',
     month: style,
     year: 'numeric',
@@ -20,7 +20,7 @@ export function formatDate(dateStr: string, style: 'long' | 'short' = 'long'): s
 }
 
 export function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
+  return new Date(dateStr).toLocaleDateString('fr-BE', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

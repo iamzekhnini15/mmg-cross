@@ -7,17 +7,21 @@ import type {
 } from '@/types/database';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-const QUARTERLY_REPORTS_KEY = ['quarterly_reports'] as const;
+function reportsKey(garageId: string | undefined) {
+  return ['quarterly_reports', garageId] as const;
+}
 
-function reportKey(year: number, quarter: number) {
-  return [...QUARTERLY_REPORTS_KEY, year, quarter] as const;
+function reportKey(garageId: string | undefined, year: number, quarter: number) {
+  return ['quarterly_reports', garageId, year, quarter] as const;
 }
 
 // ─── Fetch all quarterly reports for the current garage ──
 
 export function useQuarterlyReports() {
+  const garageId = useGarageStore((s) => s.currentGarage?.id);
+
   return useQuery({
-    queryKey: QUARTERLY_REPORTS_KEY,
+    queryKey: reportsKey(garageId),
     queryFn: async (): Promise<QuarterlyReport[]> => {
       const { data, error } = await supabase
         .from('quarterly_reports')
@@ -27,14 +31,17 @@ export function useQuarterlyReports() {
       if (error) throw error;
       return (data ?? []) as QuarterlyReport[];
     },
+    enabled: !!garageId,
   });
 }
 
 // ─── Fetch a specific quarterly report ───────────────
 
 export function useQuarterlyReport(year: number, quarter: number) {
+  const garageId = useGarageStore((s) => s.currentGarage?.id);
+
   return useQuery({
-    queryKey: reportKey(year, quarter),
+    queryKey: reportKey(garageId, year, quarter),
     queryFn: async (): Promise<QuarterlyReport | null> => {
       const { data, error } = await supabase
         .from('quarterly_reports')
@@ -45,6 +52,7 @@ export function useQuarterlyReport(year: number, quarter: number) {
       if (error) throw error;
       return data as QuarterlyReport | null;
     },
+    enabled: !!garageId,
   });
 }
 
@@ -72,8 +80,9 @@ export function useUpsertQuarterlyReport() {
       return data as QuarterlyReport;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: QUARTERLY_REPORTS_KEY });
-      queryClient.invalidateQueries({ queryKey: reportKey(data.year, data.quarter) });
+      const garageId = useGarageStore.getState().currentGarage?.id;
+      queryClient.invalidateQueries({ queryKey: reportsKey(garageId) });
+      queryClient.invalidateQueries({ queryKey: reportKey(garageId, data.year, data.quarter) });
     },
   });
 }
@@ -101,8 +110,9 @@ export function useUpdateQuarterlyReport() {
       return data as QuarterlyReport;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: QUARTERLY_REPORTS_KEY });
-      queryClient.invalidateQueries({ queryKey: reportKey(data.year, data.quarter) });
+      const garageId = useGarageStore.getState().currentGarage?.id;
+      queryClient.invalidateQueries({ queryKey: reportsKey(garageId) });
+      queryClient.invalidateQueries({ queryKey: reportKey(garageId, data.year, data.quarter) });
     },
   });
 }

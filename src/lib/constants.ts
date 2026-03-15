@@ -220,7 +220,7 @@ export const CIVILITY_LABELS: Record<Civility, string> = {
 
 // ─── Default VAT Rate ────────────────────────────────
 
-export const DEFAULT_VAT_RATE = 20.0;
+export const DEFAULT_VAT_RATE = 21.0;
 
 // ─── Belgian VAT Rate ────────────────────────────────
 

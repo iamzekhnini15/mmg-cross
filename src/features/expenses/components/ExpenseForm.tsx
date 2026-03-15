@@ -172,7 +172,7 @@ export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="TVA %"
-                    placeholder="20"
+                    placeholder="21"
                     value={value !== undefined ? String(value) : ''}
                     onChangeText={(text) => handleVatRateChange(parseNumber(text), onChange)}
                     onBlur={onBlur}
