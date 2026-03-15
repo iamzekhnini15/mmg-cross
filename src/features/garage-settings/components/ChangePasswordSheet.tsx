@@ -7,8 +7,8 @@ import {
   changePasswordSchema,
   type ChangePasswordFormData,
 } from '@/features/garage-settings/schemas/changePasswordForm';
-import { zodResolver } from '@hookform/resolvers/zod';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 
 export const ChangePasswordSheet = forwardRef<BottomSheet>(function ChangePasswordSheet(_, ref) {

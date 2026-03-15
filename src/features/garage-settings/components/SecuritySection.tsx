@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui';
-import { SettingsRow } from './SettingsRow';
 import type { User } from '@supabase/supabase-js';
+import { SettingsRow } from './SettingsRow';
 
 interface SecuritySectionProps {
   user: User | null;
