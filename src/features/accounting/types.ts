@@ -1,5 +1,3 @@
-import type { Expense, Sale, Vehicle } from '@/types/database';
-
 // ─── Quarter helpers ─────────────────────────────────
 
 export interface Quarter {
@@ -34,24 +32,7 @@ export function quarterLabel(year: number, quarter: number): string {
   return `T${quarter} ${year}`;
 }
 
-// ─── Enriched data structures ────────────────────────
-
-export interface VehicleWithSaleAndExpenses {
-  vehicle: Vehicle;
-  sale: Sale | null;
-  expenses: Expense[];
-  totalExpenses: number;
-  vatRegime: 'margin' | 'normal';
-}
-
 // ─── TVA grid types ──────────────────────────────────
-
-export interface TVALine {
-  /** Base imposable HT */
-  base: number;
-  /** TVA collectée */
-  vat: number;
-}
 
 export interface TVAGrids {
   /** Grille 03 – Base imposable des ventes */

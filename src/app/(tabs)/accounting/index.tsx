@@ -1,4 +1,5 @@
 import { ExpensesSection } from '@/features/accounting/components/ExpensesSection';
+import { InvoicesSection } from '@/features/accounting/components/InvoicesSection';
 import { PurchasesSection } from '@/features/accounting/components/PurchasesSection';
 import { QuarterSelector } from '@/features/accounting/components/QuarterSelector';
 import { SalesSection } from '@/features/accounting/components/SalesSection';
@@ -6,13 +7,14 @@ import { TVASummary } from '@/features/accounting/components/TVASummary';
 import { useQuarterlyData } from '@/features/accounting/hooks/useQuarterlyData';
 import {
   useQuarterlyReport,
-  useUpsertQuarterlyReport,
   useUpdateQuarterlyReport,
+  useUpsertQuarterlyReport,
 } from '@/features/accounting/hooks/useQuarterlyReport';
 import { useTVACalculations } from '@/features/accounting/hooks/useTVACalculations';
 import { currentQuarter, quarterLabel } from '@/features/accounting/types';
-import { generateAccountingReportHtml } from '@/lib/pdf/accountingReportTemplate';
 import { QUARTERLY_REPORT_STATUSES } from '@/lib/constants';
+import { generateAndShareExcel } from '@/lib/excel/accountingExport';
+import { generateAccountingReportHtml } from '@/lib/pdf/accountingReportTemplate';
 import { useGarageStore } from '@/stores/garageStore';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
@@ -47,7 +49,7 @@ export default function AccountingScreen() {
   const cq = currentQuarter();
   const [year, setYear] = useState(cq.year);
   const [quarter, setQuarter] = useState<1 | 2 | 3 | 4>(cq.quarter);
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
 
   const garage = useGarageStore((s) => s.currentGarage);
   const quarterlyDataQuery = useQuarterlyData(year, quarter);
@@ -117,7 +119,7 @@ export default function AccountingScreen() {
   };
 
   const handleExportPDF = async () => {
-    setExporting(true);
+    setExporting('pdf');
     try {
       const html = generateAccountingReportHtml({
         year,
@@ -133,7 +135,27 @@ export default function AccountingScreen() {
       const msg = e instanceof Error ? e.message : "Erreur lors de l'export";
       Alert.alert('Erreur', msg);
     } finally {
-      setExporting(false);
+      setExporting(null);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setExporting('excel');
+    try {
+      await generateAndShareExcel({
+        year,
+        quarter,
+        grids,
+        saleRows,
+        purchaseRows,
+        expenseRows,
+        garage,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Erreur lors de l'export Excel";
+      Alert.alert('Erreur', msg);
+    } finally {
+      setExporting(null);
     }
   };
 
@@ -146,55 +168,68 @@ export default function AccountingScreen() {
   return (
     <View className="flex-1 bg-background">
       {/* Header */}
-      <View className="pt-14 pb-3 px-4 border-b border-border">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-text-primary text-2xl font-bold">Comptabilité</Text>
-          <View className="flex-row gap-2">
-            {/* Export PDF button */}
+      <View className="pt-4 pb-3 px-4 border-b border-border">
+        <View className="flex-row gap-2">
+          {/* Export PDF button */}
+          <Pressable
+            onPress={handleExportPDF}
+            disabled={isLoading || !!exporting}
+            className="flex-row items-center gap-1 bg-surface px-3 py-2 rounded-lg"
+            accessibilityLabel="Exporter en PDF"
+            accessibilityRole="button"
+          >
+            {exporting === 'pdf' ? (
+              <ActivityIndicator size="small" color="#3B82F6" />
+            ) : (
+              <Ionicons name="document-text-outline" size={18} color="#3B82F6" />
+            )}
+            <Text className="text-blue-400 text-sm font-medium">PDF</Text>
+          </Pressable>
+
+          {/* Export Excel button */}
+          <Pressable
+            onPress={handleExportExcel}
+            disabled={isLoading || !!exporting}
+            className="flex-row items-center gap-1 bg-surface px-3 py-2 rounded-lg"
+            accessibilityLabel="Exporter en Excel"
+            accessibilityRole="button"
+          >
+            {exporting === 'excel' ? (
+              <ActivityIndicator size="small" color="#10B981" />
+            ) : (
+              <Ionicons name="grid-outline" size={18} color="#10B981" />
+            )}
+            <Text className="text-emerald-400 text-sm font-medium">Excel</Text>
+          </Pressable>
+
+          {/* Submit / Reopen button */}
+          {isSubmitted ? (
             <Pressable
-              onPress={handleExportPDF}
-              disabled={isLoading || exporting}
-              className="flex-row items-center gap-1 bg-surface px-3 py-2 rounded-lg"
-              accessibilityLabel="Exporter en PDF"
+              onPress={handleMarkDraft}
+              disabled={isPending}
+              className="flex-row items-center gap-1 bg-green-900/40 px-3 py-2 rounded-lg"
+              accessibilityLabel="Rouvrir le trimestre"
               accessibilityRole="button"
             >
-              {exporting ? (
-                <ActivityIndicator size="small" color="#3B82F6" />
-              ) : (
-                <Ionicons name="document-text-outline" size={18} color="#3B82F6" />
-              )}
-              <Text className="text-blue-400 text-sm font-medium">PDF</Text>
+              <Ionicons name="checkmark-circle" size={18} color="#4ade80" />
+              <Text className="text-green-400 text-sm font-medium">Transmis</Text>
             </Pressable>
-
-            {/* Submit / Reopen button */}
-            {isSubmitted ? (
-              <Pressable
-                onPress={handleMarkDraft}
-                disabled={isPending}
-                className="flex-row items-center gap-1 bg-green-900/40 px-3 py-2 rounded-lg"
-                accessibilityLabel="Rouvrir le trimestre"
-                accessibilityRole="button"
-              >
-                <Ionicons name="checkmark-circle" size={18} color="#4ade80" />
-                <Text className="text-green-400 text-sm font-medium">Transmis</Text>
-              </Pressable>
-            ) : (
-              <Pressable
-                onPress={handleMarkSubmitted}
-                disabled={isPending || isLoading}
-                className="flex-row items-center gap-1 bg-surface px-3 py-2 rounded-lg"
-                accessibilityLabel="Marquer comme transmis au comptable"
-                accessibilityRole="button"
-              >
-                {isPending ? (
-                  <ActivityIndicator size="small" color="#6B7280" />
-                ) : (
-                  <Ionicons name="send-outline" size={18} color="#6B7280" />
-                )}
-                <Text className="text-text-secondary text-sm font-medium">Transmettre</Text>
-              </Pressable>
-            )}
-          </View>
+          ) : (
+            <Pressable
+              onPress={handleMarkSubmitted}
+              disabled={isPending || isLoading}
+              className="flex-row items-center gap-1 bg-surface px-3 py-2 rounded-lg"
+              accessibilityLabel="Marquer comme transmis au comptable"
+              accessibilityRole="button"
+            >
+              {isPending ? (
+                <ActivityIndicator size="small" color="#6B7280" />
+              ) : (
+                <Ionicons name="send-outline" size={18} color="#6B7280" />
+              )}
+              <Text className="text-text-secondary text-sm font-medium">Transmettre</Text>
+            </Pressable>
+          )}
         </View>
         {isSubmitted && report?.submitted_at && (
           <Text className="text-green-400 text-xs mt-1">
@@ -245,6 +280,12 @@ export default function AccountingScreen() {
 
           {/* Expenses */}
           <ExpensesSection rows={expenseRows} />
+
+          {/* Invoices */}
+          <InvoicesSection
+            sales={quarterlyDataQuery.data?.quarterSales ?? []}
+            vehicleMap={quarterlyDataQuery.data?.vehicleMap ?? new Map()}
+          />
         </ScrollView>
       )}
     </View>

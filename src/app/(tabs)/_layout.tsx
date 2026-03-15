@@ -81,10 +81,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="accounting"
+        name="accounting/index"
         options={{
           title: 'Comptabilité',
-          tabBarLabel: 'Compta',
+          tabBarLabel: 'Comptabilité',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="receipt-outline" size={size} color={color} />
           ),

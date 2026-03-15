@@ -23,10 +23,10 @@ export function SalesSection({ rows }: SalesSectionProps) {
                 <Text className="text-text-primary text-sm font-medium" numberOfLines={1}>
                   {row.vehicleLabel}
                 </Text>
-                <Text className="text-text-tertiary text-xs mt-0.5">
+                <Text className="text-text-muted text-xs mt-0.5">
                   {row.invoiceNumber} · {formatDate(row.saleDate, 'short')}
                 </Text>
-                <Text className="text-text-tertiary text-xs">
+                <Text className="text-text-muted text-xs">
                   {row.clientName}
                   {row.clientVatNumber ? ` · TVA: ${row.clientVatNumber}` : ''}
                 </Text>
@@ -49,14 +49,14 @@ export function SalesSection({ rows }: SalesSectionProps) {
             {/* Amounts */}
             <View className="flex-row justify-between mt-2">
               <View>
-                <Text className="text-text-tertiary text-xs">Prix de vente</Text>
+                <Text className="text-text-muted text-xs">Prix de vente</Text>
                 <Text className="text-text-primary text-sm font-medium">
                   {formatPrice(row.salePrice)}
                 </Text>
               </View>
               {row.vatRegime === 'margin' && (
                 <View>
-                  <Text className="text-text-tertiary text-xs">Marge</Text>
+                  <Text className="text-text-muted text-xs">Marge</Text>
                   <Text
                     className={`text-sm font-medium ${
                       row.margin >= 0 ? 'text-green-400' : 'text-red-400'
@@ -67,13 +67,13 @@ export function SalesSection({ rows }: SalesSectionProps) {
                 </View>
               )}
               <View>
-                <Text className="text-text-tertiary text-xs">Base grille 03</Text>
+                <Text className="text-text-muted text-xs">Base grille 03</Text>
                 <Text className="text-text-primary text-sm font-medium">
                   {formatPrice(row.baseHT)}
                 </Text>
               </View>
               <View>
-                <Text className="text-text-tertiary text-xs">TVA grille 54</Text>
+                <Text className="text-text-muted text-xs">TVA grille 54</Text>
                 <Text className="text-blue-400 text-sm font-medium">
                   {formatPrice(row.vatCollected)}
                 </Text>

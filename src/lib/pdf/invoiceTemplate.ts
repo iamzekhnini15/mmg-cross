@@ -14,7 +14,7 @@ import {
 import type { Garage, Vehicle } from '@/types/database';
 
 function formatPrice(price: number): string {
-  return new Intl.NumberFormat('fr-FR', {
+  return new Intl.NumberFormat('fr-BE', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 2,
@@ -23,7 +23,7 @@ function formatPrice(price: number): string {
 }
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
+  return new Date(dateStr).toLocaleDateString('fr-BE', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -31,7 +31,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatMileage(km: number): string {
-  return new Intl.NumberFormat('fr-FR').format(km) + ' km';
+  return new Intl.NumberFormat('fr-BE').format(km) + ' km';
 }
 
 interface InvoiceData {
@@ -263,7 +263,7 @@ export function generateInvoiceHtml({
       <div class="company-name">${sellerName}</div>
       <div class="company-info">
         ${sellerAddress ? sellerAddress + '<br/>' : ''}
-        ${sellerSiret ? 'SIRET : ' + sellerSiret : ''}
+        ${sellerSiret ? 'BCE / TVA : ' + sellerSiret : ''}
       </div>
     </div>
     <div class="invoice-meta">
@@ -280,7 +280,7 @@ export function generateInvoiceHtml({
         ${sellerAddress ? sellerAddress + '<br/>' : ''}
         ${sellerPhone ? 'Tél : ' + sellerPhone + '<br/>' : ''}
         ${sellerEmail ? 'Email : ' + sellerEmail + '<br/>' : ''}
-        ${sellerSiret ? 'SIRET : ' + sellerSiret : ''}
+        ${sellerSiret ? 'BCE / TVA : ' + sellerSiret : ''}
       </div>
     </div>
     <div class="party">
@@ -291,7 +291,7 @@ export function generateInvoiceHtml({
         ${clientAddress}
         ${sale.client_phone ? `<br/>Tél : ${sale.client_phone}` : ''}
         ${sale.client_email ? `<br/>Email : ${sale.client_email}` : ''}
-        ${sale.siret ? `<br/>SIRET : ${sale.siret}` : ''}
+        ${sale.siret ? `<br/>BCE : ${sale.siret}` : ''}
         ${sale.vat_number ? `<br/>TVA Intra : ${sale.vat_number}` : ''}
       </div>
     </div>

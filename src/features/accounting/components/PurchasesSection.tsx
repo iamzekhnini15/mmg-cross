@@ -24,7 +24,7 @@ export function PurchasesSection({ rows }: PurchasesSectionProps) {
                 <Text className="text-text-primary text-sm font-medium" numberOfLines={1}>
                   {row.vehicleLabel}
                 </Text>
-                <Text className="text-text-tertiary text-xs mt-0.5">
+                <Text className="text-text-muted text-xs mt-0.5">
                   {formatDate(row.purchaseDate, 'short')}
                   {row.sellerName ? ` · ${row.sellerName}` : ''}
                   {row.sellerVatNumber ? ` · TVA: ${row.sellerVatNumber}` : ''}
@@ -47,13 +47,13 @@ export function PurchasesSection({ rows }: PurchasesSectionProps) {
 
             <View className="flex-row justify-between mt-2">
               <View>
-                <Text className="text-text-tertiary text-xs">Prix d{"'"}achat</Text>
+                <Text className="text-text-muted text-xs">Prix d{"'"}achat</Text>
                 <Text className="text-text-primary text-sm font-medium">
                   {formatPrice(row.purchasePrice)}
                 </Text>
               </View>
               <View>
-                <Text className="text-text-tertiary text-xs">TVA déductible (59)</Text>
+                <Text className="text-text-muted text-xs">TVA déductible (59)</Text>
                 <Text
                   className={`text-sm font-medium ${
                     row.deductibleVat > 0 ? 'text-green-400' : 'text-text-secondary'

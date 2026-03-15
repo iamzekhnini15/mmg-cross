@@ -1,12 +1,31 @@
 import { LoadingSpinner } from '@/components/ui';
-import { StatCard } from '@/features/dashboard/components/StatCard';
-import { useStats } from '@/features/dashboard/hooks/useStats';
-import { formatDays, formatPrice } from '@/lib/formatters';
+import { ExpenseAnalysisSection } from '@/features/stats/components/ExpenseAnalysisSection';
+import { FinancialSection } from '@/features/stats/components/FinancialSection';
+import { KPISummaryGrid } from '@/features/stats/components/KPISummaryGrid';
+import { PerformanceSection } from '@/features/stats/components/PerformanceSection';
+import { PeriodSelector } from '@/features/stats/components/PeriodSelector';
+import { SalesAnalysisSection } from '@/features/stats/components/SalesAnalysisSection';
+import { StockSection } from '@/features/stats/components/StockSection';
+import { VehicleAnalysisSection } from '@/features/stats/components/VehicleAnalysisSection';
+import { useExpenseKPIs } from '@/features/stats/hooks/useExpenseKPIs';
+import { useFinancialKPIs } from '@/features/stats/hooks/useFinancialKPIs';
+import { usePeriodFilter } from '@/features/stats/hooks/usePeriodFilter';
+import { useSalesKPIs } from '@/features/stats/hooks/useSalesKPIs';
+import { useStatsData } from '@/features/stats/hooks/useStatsData';
+import { useStockKPIs } from '@/features/stats/hooks/useStockKPIs';
+import { useVehicleKPIs } from '@/features/stats/hooks/useVehicleKPIs';
 import { Ionicons } from '@expo/vector-icons';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 export default function StatsScreen() {
-  const { stats, isLoading, isRefetching, error, refetch } = useStats();
+  const { periodFilter, setPeriodType } = usePeriodFilter();
+  const { data, isLoading, isRefetching, error, refetch } = useStatsData(periodFilter);
+
+  const financial = useFinancialKPIs(data);
+  const stock = useStockKPIs(data);
+  const sales = useSalesKPIs(data);
+  const expenses = useExpenseKPIs(data);
+  const vehicle = useVehicleKPIs(data);
 
   if (isLoading) {
     return <LoadingSpinner fullScreen />;
@@ -25,56 +44,35 @@ export default function StatsScreen() {
   }
 
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerClassName="px-4 py-4 gap-4 pb-10"
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefetching}
-          onRefresh={refetch}
-          tintColor="#3B82F6"
-          colors={['#3B82F6']}
-        />
-      }
-    >
-      <StatCard
-        icon="car-outline"
-        iconColor="#3B82F6"
-        label="Stock actuel"
-        value={String(stats?.stockCount ?? 0)}
-        subtitle={`sur ${stats?.totalVehicles ?? 0} vehicule(s) au total`}
-      />
+    <View className="flex-1 bg-background">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-4 py-4 gap-4 pb-10"
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            tintColor="#3B82F6"
+            colors={['#3B82F6']}
+          />
+        }
+      >
+        <PeriodSelector activeType={periodFilter.type} onChange={setPeriodType} />
 
-      <StatCard
-        icon="cash-outline"
-        iconColor="#22C55E"
-        label="Chiffre d'affaires"
-        value={formatPrice(stats?.totalRevenue ?? 0)}
-        subtitle={`${stats?.soldCount ?? 0} vente(s)`}
-      />
+        <KPISummaryGrid financial={financial} stock={stock} sales={sales} vehicle={vehicle} />
 
-      <StatCard
-        icon="trending-up-outline"
-        iconColor="#10B981"
-        label="Marge moyenne"
-        value={formatPrice(stats?.averageMargin ?? 0)}
-        subtitle={stats?.soldCount ? `sur ${stats.soldCount} vente(s)` : 'Aucune vente'}
-      />
+        {financial && <FinancialSection data={financial} />}
 
-      <StatCard
-        icon="construct-outline"
-        iconColor="#F97316"
-        label="Cout moyen de preparation"
-        value={formatPrice(stats?.averagePrepCost ?? 0)}
-      />
+        {stock && <StockSection data={stock} />}
 
-      <StatCard
-        icon="time-outline"
-        iconColor="#06B6D4"
-        label="Rotation du stock"
-        value={stats?.averageRotationDays ? formatDays(stats.averageRotationDays) : 'N/A'}
-        subtitle="duree moyenne achat → vente"
-      />
-    </ScrollView>
+        {sales && <SalesAnalysisSection data={sales} />}
+
+        {expenses && <ExpenseAnalysisSection data={expenses} />}
+
+        {vehicle && <VehicleAnalysisSection data={vehicle} />}
+
+        {vehicle && <PerformanceSection data={vehicle} />}
+      </ScrollView>
+    </View>
   );
 }
