@@ -80,6 +80,17 @@ export default function TabsLayout() {
           tabBarAccessibilityLabel: 'Garage',
         }}
       />
+      <Tabs.Screen
+        name="accounting"
+        options={{
+          title: 'Comptabilité',
+          tabBarLabel: 'Compta',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="receipt-outline" size={size} color={color} />
+          ),
+          tabBarAccessibilityLabel: 'Comptabilité',
+        }}
+      />
     </Tabs>
   );
 }

@@ -43,6 +43,12 @@ export interface Database {
         Update: SaleUpdate;
         Relationships: [];
       };
+      quarterly_reports: {
+        Row: QuarterlyReport;
+        Insert: QuarterlyReportInsert;
+        Update: QuarterlyReportUpdate;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -147,6 +153,8 @@ export interface Vehicle {
   seller_type: string;
   seller_name: string | null;
   seller_phone: string | null;
+  seller_vat_number: string | null;
+  vat_regime: string;
   notes: string | null;
   status: string;
   created_at: string;
@@ -172,6 +180,8 @@ export interface VehicleInsert {
   seller_type: string;
   seller_name?: string | null;
   seller_phone?: string | null;
+  seller_vat_number?: string | null;
+  vat_regime?: string;
   notes?: string | null;
   status?: string;
   created_at?: string;
@@ -197,6 +207,8 @@ export interface VehicleUpdate {
   seller_type?: string;
   seller_name?: string | null;
   seller_phone?: string | null;
+  seller_vat_number?: string | null;
+  vat_regime?: string;
   notes?: string | null;
   status?: string;
   created_at?: string;
@@ -392,4 +404,42 @@ export interface SaleUpdate {
   vat_number?: string | null;
   invoice_pdf_path?: string | null;
   created_at?: string;
+}
+
+// ─── Quarterly Reports ───────────────────────────────
+
+export interface QuarterlyReport {
+  id: string;
+  garage_id: string;
+  year: number;
+  quarter: number;
+  status: string;
+  submitted_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuarterlyReportInsert {
+  id?: string;
+  garage_id?: string;
+  year: number;
+  quarter: number;
+  status?: string;
+  submitted_at?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface QuarterlyReportUpdate {
+  id?: string;
+  garage_id?: string;
+  year?: number;
+  quarter?: number;
+  status?: string;
+  submitted_at?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }

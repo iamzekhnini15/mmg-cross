@@ -1,7 +1,13 @@
 import { Button, Card, Input, ResultModal, Select } from '@/components/ui';
 import { useCreateVehicle } from '@/features/vehicles/hooks/useVehicles';
 import { vehicleFormSchema, type VehicleFormData } from '@/features/vehicles/schemas/vehicleForm';
-import { FUEL_TYPE_LABELS, SELLER_TYPE_LABELS, TRANSMISSION_LABELS } from '@/lib/constants';
+import {
+  FUEL_TYPE_LABELS,
+  SELLER_TYPE_LABELS,
+  SELLER_TYPES,
+  TRANSMISSION_LABELS,
+  VAT_REGIMES,
+} from '@/lib/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -42,6 +48,7 @@ export function VehicleForm() {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleFormSchema),
@@ -62,13 +69,19 @@ export function VehicleForm() {
       seller_type: '' as VehicleFormData['seller_type'],
       seller_name: '',
       seller_phone: '',
+      seller_vat_number: '',
       notes: '',
     },
   });
 
+  const sellerType = watch('seller_type');
+  const isProfessionalSeller = sellerType === SELLER_TYPES.PROFESSIONAL;
+
   const onSubmit = handleSubmit(async (data) => {
     try {
       setSubmitError(null);
+      const vatRegime =
+        data.seller_type === SELLER_TYPES.PROFESSIONAL ? VAT_REGIMES.NORMAL : VAT_REGIMES.MARGIN;
       await createVehicle.mutateAsync({
         brand: data.brand,
         model: data.model,
@@ -86,6 +99,8 @@ export function VehicleForm() {
         seller_type: data.seller_type,
         seller_name: data.seller_name || null,
         seller_phone: data.seller_phone || null,
+        seller_vat_number: data.seller_vat_number || null,
+        vat_regime: vatRegime,
         notes: data.notes || null,
         status: data.status,
       });
@@ -400,6 +415,24 @@ export function VehicleForm() {
               />
             )}
           />
+
+          {isProfessionalSeller && (
+            <Controller
+              control={control}
+              name="seller_vat_number"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="N° TVA du vendeur"
+                  placeholder="BE 0XXX.XXX.XXX"
+                  value={value}
+                  onChangeText={(text) => onChange(text.toUpperCase())}
+                  onBlur={onBlur}
+                  error={errors.seller_vat_number?.message}
+                  autoCapitalize="characters"
+                />
+              )}
+            />
+          )}
         </Card>
 
         {/* ── Notes ── */}
