@@ -1,10 +1,17 @@
 import { z } from 'zod';
-import { VEHICLE_STATUSES, FUEL_TYPES, TRANSMISSION_TYPES, SELLER_TYPES } from '@/lib/constants';
+import {
+  VEHICLE_STATUSES,
+  FUEL_TYPES,
+  TRANSMISSION_TYPES,
+  SELLER_TYPES,
+  VAT_REGIMES,
+} from '@/lib/constants';
 
 const fuelTypeValues = Object.values(FUEL_TYPES) as [string, ...string[]];
 const transmissionValues = Object.values(TRANSMISSION_TYPES) as [string, ...string[]];
 const sellerTypeValues = Object.values(SELLER_TYPES) as [string, ...string[]];
 const statusValues = Object.values(VEHICLE_STATUSES) as [string, ...string[]];
+const vatRegimeValues = Object.values(VAT_REGIMES) as [string, ...string[]];
 
 export const vehicleFormSchema = z.object({
   brand: z.string().min(1, 'La marque est requise'),
@@ -45,6 +52,8 @@ export const vehicleFormSchema = z.object({
   }),
   seller_name: z.string(),
   seller_phone: z.string(),
+  seller_vat_number: z.string(),
+  vat_regime: z.enum(vatRegimeValues).optional(),
   notes: z.string(),
   status: z.enum(statusValues).optional(),
 });

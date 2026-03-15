@@ -222,6 +222,39 @@ export const CIVILITY_LABELS: Record<Civility, string> = {
 
 export const DEFAULT_VAT_RATE = 20.0;
 
+// ─── Belgian VAT Rate ────────────────────────────────
+
+export const BELGIAN_VAT_RATE = 21.0;
+
+// ─── VAT Regimes (Belgian used-vehicle dealer) ───────
+
+export const VAT_REGIMES = {
+  MARGIN: 'margin',
+  NORMAL: 'normal',
+} as const;
+
+export type VatRegime = (typeof VAT_REGIMES)[keyof typeof VAT_REGIMES];
+
+export const VAT_REGIME_LABELS: Record<VatRegime, string> = {
+  [VAT_REGIMES.MARGIN]: 'Régime de la marge',
+  [VAT_REGIMES.NORMAL]: 'Régime normal',
+};
+
+// ─── Quarterly Report Statuses ───────────────────────
+
+export const QUARTERLY_REPORT_STATUSES = {
+  DRAFT: 'draft',
+  SUBMITTED: 'submitted',
+} as const;
+
+export type QuarterlyReportStatus =
+  (typeof QUARTERLY_REPORT_STATUSES)[keyof typeof QUARTERLY_REPORT_STATUSES];
+
+export const QUARTERLY_REPORT_STATUS_LABELS: Record<QuarterlyReportStatus, string> = {
+  [QUARTERLY_REPORT_STATUSES.DRAFT]: 'En cours',
+  [QUARTERLY_REPORT_STATUSES.SUBMITTED]: 'Transmis au comptable',
+};
+
 // ─── Garage Roles ───────────────────────────────────
 
 export const GARAGE_ROLES = {
