@@ -27,9 +27,10 @@ interface ExpenseFormProps {
   vehicleId: string;
   onSuccess: () => void;
   onCancel: () => void;
+  initialData?: Partial<ExpenseFormData>;
 }
 
-export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps) {
+export function ExpenseForm({ vehicleId, onSuccess, onCancel, initialData }: ExpenseFormProps) {
   const createExpense = useCreateExpense();
   const [result, setResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -51,6 +52,7 @@ export function ExpenseForm({ vehicleId, onSuccess, onCancel }: ExpenseFormProps
       payment_status: 'pending' as ExpenseFormData['payment_status'],
       invoice_ref: '',
       notes: '',
+      ...initialData,
     },
   });
 

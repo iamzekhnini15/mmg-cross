@@ -4,12 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { Card, LoadingSpinner } from '@/components/ui';
 import { ExpenseCard } from '@/features/expenses/components/ExpenseCard';
 import { ExpenseForm } from '@/features/expenses/components/ExpenseForm';
+import { InvoiceScanButton } from '@/features/expenses/components/InvoiceScanButton';
 import {
   useExpensesSummary,
   useDeleteExpense,
   useUpdateExpense,
 } from '@/features/expenses/hooks/useExpenses';
 import { EXPENSE_CATEGORY_LABELS, type ExpenseCategory } from '@/lib/constants';
+import type { InvoiceScanResult } from '@/features/expenses/types/invoiceScan';
+import type { ExpenseFormData } from '@/features/expenses/schemas/expenseForm';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -28,6 +31,7 @@ export function ExpenseList({ vehicleId }: ExpenseListProps) {
   const deleteExpense = useDeleteExpense();
   const updateExpense = useUpdateExpense();
   const [showForm, setShowForm] = useState(false);
+  const [scanData, setScanData] = useState<Partial<ExpenseFormData> | undefined>(undefined);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -56,19 +60,37 @@ export function ExpenseList({ vehicleId }: ExpenseListProps) {
     [updateExpense, vehicleId],
   );
 
+  const handleScanComplete = useCallback((data: InvoiceScanResult) => {
+    setScanData({
+      provider: data.provider ?? '',
+      invoice_ref: data.invoice_ref ?? '',
+      expense_date: data.expense_date ?? new Date().toISOString().split('T')[0],
+      amount_ht: data.amount_ht ?? 0,
+      amount_ttc: data.amount_ttc ?? 0,
+      vat_rate: data.vat_rate,
+    });
+    setShowForm(true);
+  }, []);
+
   return (
     <>
       <Card className="mb-4">
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-text-primary text-lg font-semibold">Frais de préparation</Text>
-          <Pressable
-            onPress={() => setShowForm(true)}
-            className="flex-row items-center bg-accent/10 rounded-lg px-3 py-1.5"
-            accessibilityLabel="Ajouter un frais"
-          >
-            <Ionicons name="add-circle-outline" size={18} color="#3B82F6" />
-            <Text className="text-accent text-sm font-medium ml-1.5">Ajouter</Text>
-          </Pressable>
+          <View className="flex-row items-center gap-2">
+            <InvoiceScanButton onScanComplete={handleScanComplete} />
+            <Pressable
+              onPress={() => {
+                setScanData(undefined);
+                setShowForm(true);
+              }}
+              className="flex-row items-center bg-accent/10 rounded-lg px-3 py-1.5"
+              accessibilityLabel="Ajouter un frais"
+            >
+              <Ionicons name="add-circle-outline" size={18} color="#3B82F6" />
+              <Text className="text-accent text-sm font-medium ml-1.5">Ajouter</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Summary */}
@@ -133,7 +155,9 @@ export function ExpenseList({ vehicleId }: ExpenseListProps) {
       >
         <View className="flex-1 bg-background">
           <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
-            <Text className="text-text-primary text-xl font-bold">Ajouter un frais</Text>
+            <Text className="text-text-primary text-xl font-bold">
+              {scanData ? 'Vérifier les données extraites' : 'Ajouter un frais'}
+            </Text>
             <Pressable
               onPress={() => setShowForm(false)}
               className="p-2"
@@ -144,8 +168,15 @@ export function ExpenseList({ vehicleId }: ExpenseListProps) {
           </View>
           <ExpenseForm
             vehicleId={vehicleId}
-            onSuccess={() => setShowForm(false)}
-            onCancel={() => setShowForm(false)}
+            onSuccess={() => {
+              setShowForm(false);
+              setScanData(undefined);
+            }}
+            onCancel={() => {
+              setShowForm(false);
+              setScanData(undefined);
+            }}
+            initialData={scanData}
           />
         </View>
       </Modal>
