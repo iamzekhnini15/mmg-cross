@@ -117,8 +117,24 @@ export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormPr
       let pdfPath = '';
 
       if (Platform.OS === 'web') {
-        // printToFileAsync is not supported on web — store a logical reference
-        pdfPath = `invoices/${invoiceNumber}.pdf`;
+        // On web, printToFileAsync is unavailable — upload the HTML as a document
+        // so the invoice still appears in the vehicle's Documents section.
+        try {
+          const htmlBlob = new Blob([html], { type: 'text/html' });
+          const blobUrl = URL.createObjectURL(htmlBlob);
+          await uploadDocument.mutateAsync({
+            vehicleId: vehicle.id,
+            uri: blobUrl,
+            fileName: `${invoiceNumber}.html`,
+            mimeType: 'text/html',
+            fileSize: htmlBlob.size,
+            category: 'invoice',
+          });
+          URL.revokeObjectURL(blobUrl);
+        } catch {
+          // Non-critical: continue even if document upload fails
+        }
+        pdfPath = `invoices/${invoiceNumber}.html`;
       } else {
         const result = await Print.printToFileAsync({ html });
         pdfPath = result.uri;

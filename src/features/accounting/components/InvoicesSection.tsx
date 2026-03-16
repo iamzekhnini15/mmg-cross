@@ -4,7 +4,6 @@ import { useGarageStore } from '@/stores/garageStore';
 import type { Sale, Vehicle } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
-import type { SaleFormData } from '@/features/sales/schemas/saleForm';
 import { Platform, Alert, Pressable, Text, View } from 'react-native';
 
 interface InvoicesSectionProps {
@@ -24,8 +23,7 @@ export function InvoicesSection({ sales, vehicleMap }: InvoicesSectionProps) {
     const html = generateInvoiceHtml({
       invoiceNumber: sale.invoice_number,
       vehicle,
-      sale: sale as unknown as SaleFormData,
-      costPrice: 0,
+      sale,
       garage: useGarageStore.getState().currentGarage,
     });
 
