@@ -8,6 +8,7 @@ import {
   WARRANTY_LABELS,
 } from '@/lib/constants';
 import { generateInvoiceHtml } from '@/lib/pdf/invoiceTemplate';
+import { fillInvoiceDocx } from '@/lib/pdf/fillDocxTemplate';
 import { useGarageStore } from '@/stores/garageStore';
 import type { Vehicle } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -117,24 +118,31 @@ export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormPr
       let pdfPath = '';
 
       if (Platform.OS === 'web') {
-        // On web, printToFileAsync is unavailable — upload the HTML as a document
-        // so the invoice still appears in the vehicle's Documents section.
+        // On web, fill the Word template and upload as .docx.
         try {
-          const htmlBlob = new Blob([html], { type: 'text/html' });
-          const blobUrl = URL.createObjectURL(htmlBlob);
+          const docxBytes = fillInvoiceDocx({
+            invoiceNumber,
+            vehicle,
+            sale: data,
+            garage: useGarageStore.getState().currentGarage,
+          });
+          const DOCX_MIME =
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          const docxBlob = new Blob([docxBytes.buffer as ArrayBuffer], { type: DOCX_MIME });
+          const blobUrl = URL.createObjectURL(docxBlob);
           await uploadDocument.mutateAsync({
             vehicleId: vehicle.id,
             uri: blobUrl,
-            fileName: `${invoiceNumber}.html`,
-            mimeType: 'text/html',
-            fileSize: htmlBlob.size,
+            fileName: `${invoiceNumber}.docx`,
+            mimeType: DOCX_MIME,
+            fileSize: docxBlob.size,
             category: 'invoice',
           });
           URL.revokeObjectURL(blobUrl);
         } catch {
           // Non-critical: continue even if document upload fails
         }
-        pdfPath = `invoices/${invoiceNumber}.html`;
+        pdfPath = `invoices/${invoiceNumber}.docx`;
       } else {
         const result = await Print.printToFileAsync({ html });
         pdfPath = result.uri;
