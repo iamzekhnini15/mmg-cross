@@ -1,5 +1,6 @@
 import { ALL_SALES_KEY } from '@/features/dashboard/hooks/useAllSales';
 import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/stores/authStore';
 import type { Sale, SaleInsert } from '@/types/database';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -74,11 +75,13 @@ export function useCreateSale() {
       if (statusError) throw statusError;
 
       // Insert status history
+      const user = useAuthStore.getState().user;
       await supabase.from('vehicle_status_history').insert({
         vehicle_id: sale.vehicle_id,
         from_status: null,
         to_status: 'sold',
         notes: `Vente enregistrée - Facture ${sale.invoice_number}`,
+        changed_by_email: user?.email ?? null,
       } as Record<string, unknown>);
 
       return data as Sale;

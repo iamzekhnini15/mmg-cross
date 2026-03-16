@@ -16,6 +16,7 @@ import * as Sharing from 'expo-sharing';
 import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Platform, ScrollView, Text, View } from 'react-native';
+import { useUploadDocument } from '@/features/media/hooks/useMedia';
 
 const paymentOptions = Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => ({
   value,
@@ -52,6 +53,7 @@ interface SaleFormProps {
 
 export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormProps) {
   const createSale = useCreateSale();
+  const uploadDocument = useUploadDocument();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [resultModal, setResultModal] = useState<{
     visible: boolean;
@@ -120,6 +122,20 @@ export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormPr
       } else {
         const result = await Print.printToFileAsync({ html });
         pdfPath = result.uri;
+
+        // Upload invoice PDF to vehicle documents section (non-critical)
+        try {
+          await uploadDocument.mutateAsync({
+            vehicleId: vehicle.id,
+            uri: pdfPath,
+            fileName: `${invoiceNumber}.pdf`,
+            mimeType: 'application/pdf',
+            fileSize: 0,
+            category: 'invoice',
+          });
+        } catch {
+          // Non-critical: continue even if document upload fails
+        }
       }
 
       // Create sale record
@@ -553,11 +569,7 @@ export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormPr
                     try {
                       const { html: storedHtml, pdfPath } = shareDataRef.current;
                       if (Platform.OS === 'web') {
-                        const printWindow = window.open('', '_blank');
-                        if (printWindow) {
-                          printWindow.document.write(storedHtml);
-                          printWindow.document.close();
-                        }
+                        await Print.printAsync({ html: storedHtml });
                       } else {
                         const canShare = await Sharing.isAvailableAsync();
                         if (canShare) {

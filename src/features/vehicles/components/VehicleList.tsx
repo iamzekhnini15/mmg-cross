@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
-import { Text, View, TextInput, Pressable, RefreshControl } from 'react-native';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Text, View, TextInput, Pressable, RefreshControl, ActivityIndicator } from 'react-native';
 import { Link } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,7 +12,16 @@ import type { Vehicle } from '@/types/database';
 
 export function VehicleList() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<VehicleStatus | null>(null);
+
+  // Debounce the search query so keystrokes don't trigger a new query immediately
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const {
     data: vehicles,
@@ -22,7 +31,7 @@ export function VehicleList() {
     error,
   } = useVehicles({
     status: selectedStatus ?? undefined,
-    search: searchQuery || undefined,
+    search: debouncedSearch || undefined,
   });
 
   // Fetch all vehicles (no filter) for global status counts
@@ -84,7 +93,9 @@ export function VehicleList() {
             accessibilityLabel="Rechercher un véhicule"
             returnKeyType="search"
           />
-          {searchQuery ? (
+          {searchQuery && debouncedSearch !== searchQuery ? (
+            <ActivityIndicator size="small" color="#6B7280" />
+          ) : searchQuery ? (
             <Pressable onPress={() => setSearchQuery('')} accessibilityLabel="Effacer la recherche">
               <Ionicons name="close-circle" size={20} color="#6B7280" />
             </Pressable>
@@ -112,14 +123,14 @@ export function VehicleList() {
           <View className="items-center justify-center py-20">
             <Ionicons name="car-outline" size={64} color="#2D2D2F" />
             <Text className="text-text-muted text-lg mt-4 mb-2">
-              {searchQuery || selectedStatus ? 'Aucun résultat' : 'Aucun véhicule'}
+              {debouncedSearch || selectedStatus ? 'Aucun résultat' : 'Aucun véhicule'}
             </Text>
             <Text className="text-text-muted text-sm text-center mb-6">
-              {searchQuery || selectedStatus
+              {debouncedSearch || selectedStatus
                 ? 'Essayez de modifier vos filtres'
                 : 'Ajoutez votre premier véhicule pour commencer'}
             </Text>
-            {!searchQuery && !selectedStatus ? (
+            {!debouncedSearch && !selectedStatus ? (
               <Link href="/(tabs)/vehicles/new" asChild>
                 <Pressable
                   className="bg-accent px-6 py-3 rounded-xl flex-row items-center"

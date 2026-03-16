@@ -116,12 +116,14 @@ export function useUploadDocument() {
       fileName,
       mimeType,
       fileSize,
+      category = null,
     }: {
       vehicleId: string;
       uri: string;
       fileName: string;
       mimeType: string;
       fileSize: number;
+      category?: string | null;
     }): Promise<Media> => {
       const garage = useGarageStore.getState().currentGarage;
       if (!garage) throw new Error('Aucun garage sélectionné');
@@ -143,10 +145,10 @@ export function useUploadDocument() {
       const mediaInsert: MediaInsert = {
         vehicle_id: vehicleId,
         type: 'document',
-        category: null,
+        category,
         file_path: filePath,
         file_name: fileName,
-        file_size: fileSize,
+        file_size: fileSize || blob.size,
       };
 
       const { data, error } = await supabase
