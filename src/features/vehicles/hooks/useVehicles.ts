@@ -1,8 +1,9 @@
 import type { VehicleStatus } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/stores/authStore';
 import { useGarageStore } from '@/stores/garageStore';
 import type { Vehicle, VehicleInsert, VehicleStatusHistory, VehicleUpdate } from '@/types/database';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const VEHICLES_KEY = ['vehicles'] as const;
 
@@ -43,6 +44,7 @@ export function useVehicles(options?: UseVehiclesOptions) {
       if (error) throw error;
       return (data ?? []) as Vehicle[];
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -116,10 +118,12 @@ export function useCreateVehicle() {
       const created = data as Vehicle;
 
       // Créer l'entrée historique initiale
+      const user = useAuthStore.getState().user;
       await supabase.from('vehicle_status_history').insert({
         vehicle_id: created.id,
         from_status: null,
         to_status: vehicle.status ?? 'purchased',
+        changed_by_email: user?.email ?? null,
       } as Record<string, unknown>);
 
       return created;
@@ -193,6 +197,7 @@ export function useChangeVehicleStatus() {
       toStatus: VehicleStatus;
       notes?: string;
     }): Promise<Vehicle> => {
+      const user = useAuthStore.getState().user;
       const [vehicleResult, historyResult] = await Promise.all([
         supabase
           .from('vehicles')
@@ -205,6 +210,7 @@ export function useChangeVehicleStatus() {
           from_status: fromStatus,
           to_status: toStatus,
           notes: notes ?? null,
+          changed_by_email: user?.email ?? null,
         } as Record<string, unknown>),
       ]);
 

@@ -61,6 +61,9 @@ export function StatusHistory({ vehicleId }: StatusHistoryProps) {
                 </Text>
               </View>
               <Text className="text-text-muted text-xs mt-0.5">{formatDate(entry.changed_at)}</Text>
+              {entry.changed_by_email ? (
+                <Text className="text-text-muted text-xs mt-0.5">par {entry.changed_by_email}</Text>
+              ) : null}
               {entry.notes ? (
                 <Text className="text-text-secondary text-xs mt-1">{entry.notes}</Text>
               ) : null}

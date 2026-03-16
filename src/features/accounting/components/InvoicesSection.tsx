@@ -1,7 +1,10 @@
 import { formatDate, formatPrice } from '@/lib/formatters';
+import { generateInvoiceHtml } from '@/lib/pdf/invoiceTemplate';
+import { useGarageStore } from '@/stores/garageStore';
 import type { Sale, Vehicle } from '@/types/database';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Platform, Pressable, Text, View } from 'react-native';
+import * as Print from 'expo-print';
+import { Platform, Alert, Pressable, Text, View } from 'react-native';
 
 interface InvoicesSectionProps {
   sales: Sale[];
@@ -13,31 +16,29 @@ function vehicleLabel(v: Vehicle): string {
 }
 
 export function InvoicesSection({ sales, vehicleMap }: InvoicesSectionProps) {
-  const handleShare = async (sale: Sale) => {
-    if (!sale.invoice_pdf_path) {
-      Alert.alert('PDF indisponible', "Aucun fichier PDF n'est associé à cette facture.");
-      return;
-    }
+  const handleView = async (sale: Sale) => {
+    const vehicle = vehicleMap.get(sale.vehicle_id);
+    if (!vehicle) return;
 
-    if (Platform.OS === 'web') {
-      Alert.alert('Non disponible', "Le partage de fichiers PDF n'est pas disponible sur le web.");
-      return;
-    }
+    const html = generateInvoiceHtml({
+      invoiceNumber: sale.invoice_number,
+      vehicle,
+      sale,
+      garage: useGarageStore.getState().currentGarage,
+    });
 
     try {
-      const { Paths } = await import('expo-file-system');
-      const Sharing = await import('expo-sharing');
-      const info = Paths.info(sale.invoice_pdf_path);
-      if (!info.exists) {
-        Alert.alert('PDF introuvable', 'Le fichier PDF a été supprimé ou déplacé.');
-        return;
+      if (Platform.OS === 'web') {
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(html);
+          printWindow.document.close();
+        }
+      } else {
+        await Print.printAsync({ html });
       }
-      await Sharing.shareAsync(sale.invoice_pdf_path, {
-        mimeType: 'application/pdf',
-        dialogTitle: `Facture ${sale.invoice_number}`,
-      });
     } catch {
-      Alert.alert('Erreur', 'Impossible de partager le fichier.');
+      Alert.alert('Erreur', "Impossible d'afficher la facture.");
     }
   };
 
@@ -55,8 +56,6 @@ export function InvoicesSection({ sales, vehicleMap }: InvoicesSectionProps) {
           const clientName = [sale.client_firstname, sale.client_lastname]
             .filter(Boolean)
             .join(' ');
-          const hasPdf = !!sale.invoice_pdf_path;
-
           return (
             <View key={sale.id} className="border-b border-border pb-3 mb-3">
               <View className="flex-row justify-between items-start">
@@ -79,18 +78,12 @@ export function InvoicesSection({ sales, vehicleMap }: InvoicesSectionProps) {
                     {formatPrice(sale.sale_price)}
                   </Text>
                   <Pressable
-                    onPress={() => handleShare(sale)}
-                    disabled={!hasPdf}
+                    onPress={() => handleView(sale)}
                     className="p-1.5"
-                    style={{ opacity: hasPdf ? 1 : 0.3 }}
-                    accessibilityLabel={`Partager la facture ${sale.invoice_number}`}
+                    accessibilityLabel={`Voir la facture ${sale.invoice_number}`}
                     accessibilityRole="button"
                   >
-                    <Ionicons
-                      name="share-outline"
-                      size={18}
-                      color={hasPdf ? '#3B82F6' : '#6B7280'}
-                    />
+                    <Ionicons name="eye-outline" size={18} color="#3B82F6" />
                   </Pressable>
                 </View>
               </View>

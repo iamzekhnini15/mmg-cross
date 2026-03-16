@@ -224,6 +224,7 @@ export interface VehicleStatusHistory {
   to_status: string;
   changed_at: string;
   notes: string | null;
+  changed_by_email: string | null;
 }
 
 export interface VehicleStatusHistoryInsert {
@@ -233,6 +234,7 @@ export interface VehicleStatusHistoryInsert {
   to_status: string;
   changed_at?: string;
   notes?: string | null;
+  changed_by_email?: string | null;
 }
 
 export interface VehicleStatusHistoryUpdate {

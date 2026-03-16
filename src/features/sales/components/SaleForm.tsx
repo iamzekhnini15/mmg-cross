@@ -16,6 +16,7 @@ import * as Sharing from 'expo-sharing';
 import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Platform, ScrollView, Text, View } from 'react-native';
+import { useUploadDocument } from '@/features/media/hooks/useMedia';
 
 const paymentOptions = Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => ({
   value,
@@ -52,6 +53,7 @@ interface SaleFormProps {
 
 export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormProps) {
   const createSale = useCreateSale();
+  const uploadDocument = useUploadDocument();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [resultModal, setResultModal] = useState<{
     visible: boolean;
@@ -115,11 +117,41 @@ export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormPr
       let pdfPath = '';
 
       if (Platform.OS === 'web') {
-        // printToFileAsync is not supported on web — store a logical reference
+        // On web, convert the HTML invoice to a PDF using html2canvas + jsPDF.
+        try {
+          const { htmlToPdfBlob } = await import('@/lib/pdf/htmlToPdfBlob');
+          const pdfBlob = await htmlToPdfBlob(html);
+          const blobUrl = URL.createObjectURL(pdfBlob);
+          await uploadDocument.mutateAsync({
+            vehicleId: vehicle.id,
+            uri: blobUrl,
+            fileName: `${invoiceNumber}.pdf`,
+            mimeType: 'application/pdf',
+            fileSize: pdfBlob.size,
+            category: 'invoice',
+          });
+          URL.revokeObjectURL(blobUrl);
+        } catch {
+          // Non-critical: continue even if document upload fails
+        }
         pdfPath = `invoices/${invoiceNumber}.pdf`;
       } else {
         const result = await Print.printToFileAsync({ html });
         pdfPath = result.uri;
+
+        // Upload invoice PDF to vehicle documents section (non-critical)
+        try {
+          await uploadDocument.mutateAsync({
+            vehicleId: vehicle.id,
+            uri: pdfPath,
+            fileName: `${invoiceNumber}.pdf`,
+            mimeType: 'application/pdf',
+            fileSize: 0,
+            category: 'invoice',
+          });
+        } catch {
+          // Non-critical: continue even if document upload fails
+        }
       }
 
       // Create sale record
@@ -553,11 +585,7 @@ export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormPr
                     try {
                       const { html: storedHtml, pdfPath } = shareDataRef.current;
                       if (Platform.OS === 'web') {
-                        const printWindow = window.open('', '_blank');
-                        if (printWindow) {
-                          printWindow.document.write(storedHtml);
-                          printWindow.document.close();
-                        }
+                        await Print.printAsync({ html: storedHtml });
                       } else {
                         const canShare = await Sharing.isAvailableAsync();
                         if (canShare) {
