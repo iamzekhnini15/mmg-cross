@@ -44,18 +44,14 @@ function DocumentRow({ media, onDelete }: { media: Media; onDelete: () => void }
     }
   };
 
-  const isWord = media.file_name?.endsWith('.docx') || media.file_name?.endsWith('.doc');
-  const iconBg = isWord ? 'bg-blue-500/10' : 'bg-red-500/10';
-  const iconColor = isWord ? '#3B82F6' : '#EF4444';
-
   return (
     <Pressable
       onPress={handleOpen}
       className="flex-row items-center py-3 border-b border-border/50"
       accessibilityLabel={`Document ${media.file_name}`}
     >
-      <View className={`w-10 h-10 rounded-xl ${iconBg} items-center justify-center mr-3`}>
-        <Ionicons name="document-text" size={20} color={iconColor} />
+      <View className="w-10 h-10 rounded-xl bg-red-500/10 items-center justify-center mr-3">
+        <Ionicons name="document-text" size={20} color="#EF4444" />
       </View>
       <View className="flex-1">
         <Text className="text-text-primary text-sm font-medium" numberOfLines={1}>

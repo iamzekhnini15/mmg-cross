@@ -8,7 +8,6 @@ import {
   WARRANTY_LABELS,
 } from '@/lib/constants';
 import { generateInvoiceHtml } from '@/lib/pdf/invoiceTemplate';
-import { fillInvoiceDocx } from '@/lib/pdf/fillDocxTemplate';
 import { useGarageStore } from '@/stores/garageStore';
 import type { Vehicle } from '@/types/database';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -118,31 +117,24 @@ export function SaleForm({ vehicle, costPrice, onSuccess, onCancel }: SaleFormPr
       let pdfPath = '';
 
       if (Platform.OS === 'web') {
-        // On web, fill the Word template and upload as .docx.
+        // On web, convert the HTML invoice to a PDF using html2canvas + jsPDF.
         try {
-          const docxBytes = fillInvoiceDocx({
-            invoiceNumber,
-            vehicle,
-            sale: data,
-            garage: useGarageStore.getState().currentGarage,
-          });
-          const DOCX_MIME =
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-          const docxBlob = new Blob([docxBytes.buffer as ArrayBuffer], { type: DOCX_MIME });
-          const blobUrl = URL.createObjectURL(docxBlob);
+          const { htmlToPdfBlob } = await import('@/lib/pdf/htmlToPdfBlob');
+          const pdfBlob = await htmlToPdfBlob(html);
+          const blobUrl = URL.createObjectURL(pdfBlob);
           await uploadDocument.mutateAsync({
             vehicleId: vehicle.id,
             uri: blobUrl,
-            fileName: `${invoiceNumber}.docx`,
-            mimeType: DOCX_MIME,
-            fileSize: docxBlob.size,
+            fileName: `${invoiceNumber}.pdf`,
+            mimeType: 'application/pdf',
+            fileSize: pdfBlob.size,
             category: 'invoice',
           });
           URL.revokeObjectURL(blobUrl);
         } catch {
           // Non-critical: continue even if document upload fails
         }
-        pdfPath = `invoices/${invoiceNumber}.docx`;
+        pdfPath = `invoices/${invoiceNumber}.pdf`;
       } else {
         const result = await Print.printToFileAsync({ html });
         pdfPath = result.uri;

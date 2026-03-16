@@ -129,6 +129,11 @@ export function generateInvoiceHtml({
 
   const generatedDate = formatDate(new Date().toISOString());
 
+  const warrantyClause =
+    sale.warranty === 'none'
+      ? "Le véhicule est vendu sans garantie contractuelle. L'acheteur reconnaît avoir été informé de cet état de fait."
+      : `Le véhicule bénéficie d'une garantie contractuelle de ${warrantyLabel} à compter de la date de livraison.`;
+
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -136,287 +141,317 @@ export function generateInvoiceHtml({
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Facture de vente ${invoiceNumber}</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ─── Reset ─── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* ─── Base ─── */
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: 11px;
-      color: #1a1a1a;
+      font-size: 10.5pt;
+      color: #1a1a2e;
       background: #fff;
-      line-height: 1.5;
+      line-height: 1.45;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
+    /* ─── A4 page wrapper (794 px = 210 mm @ 96 dpi) ─── */
     .page {
-      max-width: 800px;
+      width: 794px;
+      min-height: 1123px;
       margin: 0 auto;
-      padding: 36px 44px 44px;
+      padding: 32px 48px 48px;
+      background: #fff;
     }
 
-    /* ── HEADER ── */
+    /* ─── Accent colours ─── */
+    :root {
+      --navy: #1e3a5f;
+      --navy-light: #eff6ff;
+      --border: #d1d5db;
+      --muted: #6b7280;
+      --soft: #f9fafb;
+    }
+
+    /* ─── HEADER ─── */
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding-bottom: 18px;
-      margin-bottom: 24px;
+      display: table;
+      width: 100%;
+      padding-bottom: 16px;
+      margin-bottom: 20px;
       border-bottom: 3px solid #1e3a5f;
     }
-    .brand-block .company-name {
-      font-size: 22px;
-      font-weight: 800;
+    .header-left  { display: table-cell; vertical-align: top; width: 55%; }
+    .header-right { display: table-cell; vertical-align: top; text-align: right; }
+
+    .company-name {
+      font-size: 22pt;
+      font-weight: 900;
       color: #1e3a5f;
       letter-spacing: -0.5px;
+      line-height: 1;
     }
-    .brand-block .company-tagline {
-      font-size: 10px;
+    .company-tagline {
+      font-size: 8.5pt;
       color: #6b7280;
-      margin-top: 2px;
+      margin-top: 3px;
+      font-style: italic;
     }
-    .brand-block .company-coords {
-      font-size: 10px;
+    .company-coords {
+      font-size: 9pt;
       color: #4b5563;
-      margin-top: 6px;
+      margin-top: 8px;
       line-height: 1.6;
     }
-    .invoice-block {
-      text-align: right;
-    }
-    .invoice-block .doc-type {
-      font-size: 18px;
-      font-weight: 700;
+    .doc-type {
+      font-size: 17pt;
+      font-weight: 800;
       color: #1e3a5f;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
     }
-    .invoice-block .doc-number {
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-      margin-top: 4px;
+    .doc-badge {
+      display: inline-block;
+      margin-top: 6px;
+      background: #1e3a5f;
+      color: #fff;
+      font-size: 10pt;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
     }
-    .invoice-block .doc-date {
-      font-size: 11px;
+    .doc-date {
+      font-size: 9pt;
       color: #6b7280;
-      margin-top: 2px;
+      margin-top: 5px;
     }
 
-    /* ── PARTIES ── */
-    .parties {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 22px;
-    }
+    /* ─── PARTIES ─── */
+    .parties { display: table; width: 100%; margin-bottom: 18px; border-spacing: 12px 0; }
     .party-box {
-      flex: 1;
+      display: table-cell;
+      width: 50%;
       border: 1px solid #d1d5db;
       border-radius: 6px;
-      padding: 12px 14px;
+      padding: 11px 13px;
+      vertical-align: top;
     }
-    .party-box .box-title {
-      font-size: 9px;
+    .party-box + .party-box { margin-left: 12px; }
+    .box-title {
+      font-size: 7.5pt;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.5px;
       color: #9ca3af;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       padding-bottom: 4px;
       border-bottom: 1px solid #e5e7eb;
     }
-    .party-box .party-name {
-      font-size: 13px;
-      font-weight: 700;
+    .party-name {
+      font-size: 12pt;
+      font-weight: 800;
       color: #111827;
       margin-bottom: 3px;
     }
-    .party-box .party-company {
-      font-size: 11px;
+    .party-company {
+      font-size: 10pt;
       font-weight: 600;
       color: #374151;
       margin-bottom: 3px;
     }
-    .party-box .party-detail {
-      font-size: 10px;
+    .party-detail {
+      font-size: 9pt;
       color: #4b5563;
-      line-height: 1.7;
+      line-height: 1.65;
+      margin-top: 2px;
     }
 
-    /* ── SECTION TITLES ── */
+    /* ─── SECTION TITLE ─── */
     .section-title {
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 8.5pt;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #1e3a5f;
       background: #eff6ff;
       padding: 5px 10px;
-      border-left: 3px solid #1e3a5f;
-      margin-bottom: 10px;
-      margin-top: 20px;
+      border-left: 4px solid #1e3a5f;
+      margin-top: 18px;
+      margin-bottom: 9px;
     }
 
-    /* ── VEHICLE SPECS TABLE ── */
+    /* ─── VEHICLE HEADLINE ─── */
+    .vehicle-headline {
+      font-size: 13.5pt;
+      font-weight: 800;
+      color: #1e3a5f;
+      margin-bottom: 9px;
+    }
+
+    /* ─── SPECS TABLE ─── */
     .specs-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
-    .specs-table tr:nth-child(odd) td {
-      background: #f9fafb;
+    .specs-table tr:nth-child(odd) td { background: #f9fafb; }
+    .specs-table td {
+      border: 1px solid #e5e7eb;
+      padding: 5px 9px;
+      vertical-align: middle;
     }
-    .specs-table .spec-label {
-      width: 38%;
-      padding: 5px 10px;
-      font-size: 10px;
+    .spec-label {
+      width: 40%;
+      font-size: 9pt;
       color: #6b7280;
       font-weight: 500;
-      border: 1px solid #e5e7eb;
     }
-    .specs-table .spec-value {
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #111827;
-      border: 1px solid #e5e7eb;
-    }
-    .vehicle-headline {
-      font-size: 15px;
+    .spec-value {
+      font-size: 10pt;
       font-weight: 700;
-      color: #1e3a5f;
-      margin-bottom: 10px;
+      color: #111827;
     }
 
-    /* ── FINANCIAL TABLE ── */
+    /* ─── FINANCIAL TABLE ─── */
     .financial-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
     .financial-table thead th {
       background: #1e3a5f;
       color: #fff;
-      font-size: 10px;
+      font-size: 8.5pt;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       padding: 7px 10px;
       text-align: left;
-      border: 1px solid #1e3a5f;
     }
     .financial-table thead th.right { text-align: right; }
     .financial-table tbody td {
-      padding: 8px 10px;
+      padding: 9px 10px;
       border: 1px solid #e5e7eb;
-      font-size: 11px;
+      font-size: 10.5pt;
       vertical-align: top;
     }
     .financial-table tbody td.right {
       text-align: right;
       font-weight: 700;
+      white-space: nowrap;
     }
-    .financial-table tfoot td {
-      padding: 7px 10px;
-      border: 1px solid #1e3a5f;
-      font-size: 12px;
-      font-weight: 700;
+    .financial-table .desc-sub {
+      display: block;
+      font-size: 8.5pt;
+      color: #6b7280;
+      margin-top: 2px;
     }
-    .financial-table tfoot td.label { background: #1e3a5f; color: #fff; }
-    .financial-table tfoot td.amount {
-      text-align: right;
+    .total-row td {
       background: #1e3a5f;
       color: #fff;
-      font-size: 14px;
+      padding: 8px 10px;
+      border: 1px solid #1e3a5f;
+      font-weight: 800;
     }
+    .total-row .total-label { font-size: 11pt; }
+    .total-row .total-amount { text-align: right; font-size: 14pt; white-space: nowrap; }
     .vat-note {
-      font-size: 9px;
+      font-size: 8.5pt;
       color: #6b7280;
       font-style: italic;
-      margin-top: 4px;
+      margin-top: 5px;
     }
 
-    /* ── INFO GRID ── */
-    .info-grid {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 6px;
-    }
+    /* ─── INFO GRID (3-col) ─── */
+    .info-grid { display: table; width: 100%; border-spacing: 10px 0; margin-bottom: 4px; }
     .info-cell {
-      flex: 1;
+      display: table-cell;
       border: 1px solid #e5e7eb;
       border-radius: 6px;
-      padding: 10px 12px;
+      padding: 9px 11px;
+      background: #f9fafb;
     }
-    .info-cell .cell-label {
-      font-size: 9px;
+    .info-cell + .info-cell { margin-left: 10px; }
+    .cell-label {
+      font-size: 7.5pt;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       color: #9ca3af;
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 4px;
     }
-    .info-cell .cell-value {
-      font-size: 12px;
-      font-weight: 700;
+    .cell-value {
+      font-size: 11pt;
+      font-weight: 800;
       color: #111827;
     }
 
-    /* ── CONDITIONS ── */
+    /* ─── CONDITIONS ─── */
     .conditions-box {
       border: 1px solid #e5e7eb;
       border-radius: 6px;
-      padding: 12px 14px;
-      font-size: 9px;
-      color: #6b7280;
-      line-height: 1.8;
-      margin-bottom: 6px;
+      padding: 10px 13px;
+      background: #fafafa;
+      margin-bottom: 4px;
     }
-    .conditions-box p { margin-bottom: 4px; }
+    .cond-item {
+      font-size: 8.5pt;
+      color: #4b5563;
+      line-height: 1.75;
+      padding: 2px 0;
+    }
+    .cond-item + .cond-item { border-top: 1px dotted #e5e7eb; }
+    .cond-item strong { color: #1e3a5f; }
 
-    /* ── SIGNATURES ── */
-    .signatures {
-      display: flex;
-      gap: 30px;
-      margin-top: 30px;
-    }
+    /* ─── SIGNATURES ─── */
+    .signatures { display: table; width: 100%; margin-top: 24px; border-spacing: 30px 0; }
     .sig-block {
-      flex: 1;
-      border-top: 1px solid #9ca3af;
+      display: table-cell;
+      border-top: 2px solid #1e3a5f;
       padding-top: 8px;
     }
-    .sig-block .sig-label {
-      font-size: 9px;
+    .sig-label {
+      font-size: 8pt;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       color: #9ca3af;
-      font-weight: 600;
-      margin-bottom: 2px;
+      font-weight: 700;
     }
-    .sig-block .sig-name {
-      font-size: 10px;
+    .sig-name {
+      font-size: 9.5pt;
       color: #374151;
-      margin-bottom: 40px;
+      margin-top: 2px;
+      margin-bottom: 44px;
     }
-    .sig-block .sig-line {
-      border-bottom: 1px dashed #9ca3af;
-      margin-top: 4px;
-    }
-    .sig-block .sig-mention {
-      font-size: 8.5px;
+    .sig-line { border-bottom: 1px dashed #9ca3af; }
+    .sig-mention {
+      font-size: 8pt;
       color: #9ca3af;
       margin-top: 4px;
       font-style: italic;
     }
 
-    /* ── FOOTER ── */
+    /* ─── FOOTER ─── */
     .footer {
-      margin-top: 30px;
-      padding-top: 12px;
+      margin-top: 24px;
+      padding-top: 10px;
       border-top: 1px solid #e5e7eb;
-      font-size: 9px;
+      font-size: 8pt;
       color: #9ca3af;
       text-align: center;
+      line-height: 1.5;
     }
 
-    @page { margin: 15mm 12mm; }
-    @media print { body { font-size: 10px; } }
+    /* ─── PRINT / @page ─── */
+    @page {
+      size: A4 portrait;
+      margin: 14mm 12mm;
+    }
+    @media print {
+      body { font-size: 10pt; }
+      .page { padding: 0; width: 100%; }
+      .section-title, .info-cell, .party-box, .conditions-box { page-break-inside: avoid; }
+    }
   </style>
 </head>
 <body>
@@ -424,19 +459,16 @@ export function generateInvoiceHtml({
 
   <!-- ═══ HEADER ═══ -->
   <div class="header">
-    <div class="brand-block">
+    <div class="header-left">
       <div class="company-name">${sellerName}</div>
       <div class="company-tagline">Commerce de véhicules d'occasion</div>
       <div class="company-coords">
-        ${sellerAddress ? sellerAddress + '<br/>' : ''}
-        ${sellerPhone ? 'Tél : ' + sellerPhone + '<br/>' : ''}
-        ${sellerEmail ? 'E-mail : ' + sellerEmail + '<br/>' : ''}
-        ${sellerSiret ? 'BCE / TVA : ' + sellerSiret : ''}
+        ${sellerAddress ? sellerAddress + '<br>' : ''}${sellerPhone ? 'Tél : ' + sellerPhone + '<br>' : ''}${sellerEmail ? 'E-mail : ' + sellerEmail + '<br>' : ''}${sellerSiret ? 'BCE / TVA : ' + sellerSiret : ''}
       </div>
     </div>
-    <div class="invoice-block">
+    <div class="header-right">
       <div class="doc-type">Facture de vente</div>
-      <div class="doc-number">N° ${invoiceNumber}</div>
+      <div class="doc-badge">N° ${invoiceNumber}</div>
       <div class="doc-date">Date : ${formatDate(sale.sale_date)}</div>
     </div>
   </div>
@@ -447,22 +479,15 @@ export function generateInvoiceHtml({
       <div class="box-title">Vendeur</div>
       <div class="party-name">${sellerName}</div>
       <div class="party-detail">
-        ${sellerAddress ? sellerAddress + '<br/>' : ''}
-        ${sellerPhone ? 'Tél : ' + sellerPhone + '<br/>' : ''}
-        ${sellerEmail ? 'E-mail : ' + sellerEmail + '<br/>' : ''}
-        ${sellerSiret ? 'BCE / TVA : ' + sellerSiret : ''}
+        ${sellerAddress ? sellerAddress + '<br>' : ''}${sellerPhone ? 'Tél : ' + sellerPhone + '<br>' : ''}${sellerEmail ? 'E-mail : ' + sellerEmail + '<br>' : ''}${sellerSiret ? 'BCE / TVA : ' + sellerSiret : ''}
       </div>
     </div>
     <div class="party-box">
-      <div class="box-title">Acheteur</div>
+      <div class="box-title">Acheteur / Client</div>
       <div class="party-name">${clientFullName}</div>
       ${sale.company_name ? `<div class="party-company">${sale.company_name}</div>` : ''}
       <div class="party-detail">
-        ${clientAddress ? clientAddress + '<br/>' : ''}
-        ${sale.client_phone ? 'Tél : ' + sale.client_phone + '<br/>' : ''}
-        ${sale.client_email ? 'E-mail : ' + sale.client_email + '<br/>' : ''}
-        ${sale.siret ? 'BCE : ' + sale.siret + '<br/>' : ''}
-        ${sale.vat_number ? 'N° TVA : ' + sale.vat_number : ''}
+        ${clientAddress ? clientAddress + '<br>' : ''}${sale.client_phone ? 'Tél : ' + sale.client_phone + '<br>' : ''}${sale.client_email ? 'E-mail : ' + sale.client_email + '<br>' : ''}${sale.siret ? 'BCE : ' + sale.siret + '<br>' : ''}${sale.vat_number ? 'N° TVA : ' + sale.vat_number : ''}
       </div>
     </div>
   </div>
@@ -470,19 +495,19 @@ export function generateInvoiceHtml({
   <!-- ═══ VEHICLE ═══ -->
   <div class="section-title">Désignation du véhicule</div>
   <div class="vehicle-headline">
-    ${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} — ${vehicle.year}
+    ${vehicle.brand} ${vehicle.model}${vehicle.version ? ' · ' + vehicle.version : ''} &mdash; ${vehicle.year}
   </div>
   <table class="specs-table">
     <tbody>
       ${row('Marque / Modèle', `${vehicle.brand} ${vehicle.model}`)}
-      ${vehicle.version ? row('Version', vehicle.version) : ''}
+      ${vehicle.version ? row('Version / Finition', vehicle.version) : ''}
       ${row('Année', vehicle.year)}
       ${vehicle.license_plate ? row('Immatriculation', vehicle.license_plate) : ''}
       ${vehicle.vin ? row('N° de châssis (VIN)', vehicle.vin) : ''}
       ${row('Carburant', FUEL_TYPE_LABELS[vehicle.fuel_type as FuelType] ?? vehicle.fuel_type)}
       ${row('Boîte de vitesses', TRANSMISSION_LABELS[vehicle.transmission as TransmissionType] ?? vehicle.transmission)}
-      ${vehicle.color ? row('Couleur', vehicle.color) : ''}
-      ${vehicle.doors ? row('Portes', vehicle.doors) : ''}
+      ${vehicle.color ? row('Couleur extérieure', vehicle.color) : ''}
+      ${vehicle.doors ? row('Nombre de portes', vehicle.doors) : ''}
       ${sale.mileage_at_sale ? row('Kilométrage à la vente', formatMileage(sale.mileage_at_sale)) : ''}
       ${row('Régime TVA', vatRegimeLabel)}
     </tbody>
@@ -493,31 +518,28 @@ export function generateInvoiceHtml({
   <table class="financial-table">
     <thead>
       <tr>
-        <th>Désignation</th>
+        <th style="width:68%">Désignation</th>
         <th class="right">Montant TTC</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td>
-          ${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''}<br/>
-          <span style="font-size:10px; color:#6b7280;">
-            ${vehicle.license_plate ? 'Immat. ' + vehicle.license_plate + ' — ' : ''}
-            ${vehicle.year} — ${sale.mileage_at_sale ? formatMileage(sale.mileage_at_sale) : ''}
+          <strong>${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''}</strong>
+          <span class="desc-sub">
+            ${vehicle.license_plate ? 'Immat. ' + vehicle.license_plate + ' &mdash; ' : ''}${vehicle.year}${sale.mileage_at_sale ? ' &mdash; ' + formatMileage(sale.mileage_at_sale) : ''}
           </span>
         </td>
         <td class="right">${formatPrice(sale.sale_price)}</td>
       </tr>
     </tbody>
-    <tfoot>
-      <tr>
-        <td class="label">TOTAL TTC</td>
-        <td class="amount">${formatPrice(sale.sale_price)}</td>
-      </tr>
-    </tfoot>
+    <tr class="total-row">
+      <td class="total-label">Total TTC</td>
+      <td class="total-amount">${formatPrice(sale.sale_price)}</td>
+    </tr>
   </table>
   ${isMarginScheme
-    ? '<p class="vat-note">Véhicule vendu sous le régime de la marge — TVA non récupérable (Art. 312 à 325 de la Directive 2006/112/CE).</p>'
+    ? "<p class=\"vat-note\">&#9432;&nbsp; V&eacute;hicule vendu sous le r&eacute;gime de la marge &mdash; TVA non r&eacute;cup&eacute;rable par l\u2019acheteur (Art. 312 &agrave; 325, Directive 2006/112/CE).</p>"
     : ''}
 
   <!-- ═══ PAYMENT & WARRANTY ═══ -->
@@ -538,16 +560,13 @@ export function generateInvoiceHtml({
   </div>
 
   <!-- ═══ CONDITIONS ═══ -->
-  <div class="section-title">Conditions générales</div>
+  <div class="section-title">Conditions générales de vente</div>
   <div class="conditions-box">
-    <p><strong>Transfert de propriété :</strong> La propriété du véhicule est transférée à l'acheteur dès réception intégrale du prix de vente.</p>
-    <p><strong>État du véhicule :</strong> Le véhicule est vendu en l'état, tel que vu et accepté par l'acheteur. Le vendeur déclare que le kilométrage indiqué est exact à sa connaissance.</p>
-    <p><strong>Garantie :</strong> ${sale.warranty === 'none'
-      ? "Le véhicule est vendu sans garantie contractuelle. L'acheteur reconnaît avoir été informé de cet état de fait."
-      : `Le véhicule bénéficie d'une garantie contractuelle de ${warrantyLabel} à compter de la date de livraison.`}
-    </p>
-    <p><strong>Immatriculation :</strong> Les démarches d'immatriculation sont à la charge de l'acheteur, sauf accord contraire.</p>
-    <p><strong>Litige :</strong> Tout litige relatif à la présente vente sera soumis au tribunal compétent du ressort du siège social du vendeur.</p>
+    <div class="cond-item"><strong>Transfert de propriété :</strong> La propriété du véhicule est transférée à l'acheteur dès réception intégrale du montant de la vente.</div>
+    <div class="cond-item"><strong>État du véhicule :</strong> Le véhicule est vendu en l'état, vu et accepté par l'acheteur. Le vendeur atteste que le kilométrage indiqué est exact à sa connaissance.</div>
+    <div class="cond-item"><strong>Garantie :</strong> ${warrantyClause}</div>
+    <div class="cond-item"><strong>Immatriculation :</strong> Les démarches d'immatriculation sont à la charge exclusive de l'acheteur, sauf accord écrit contraire.</div>
+    <div class="cond-item"><strong>Litige :</strong> Tout litige relatif à la présente vente sera soumis au tribunal compétent du ressort du siège social du vendeur.</div>
   </div>
 
   <!-- ═══ SIGNATURES ═══ -->
@@ -556,20 +575,19 @@ export function generateInvoiceHtml({
       <div class="sig-label">Signature du vendeur</div>
       <div class="sig-name">${sellerName}</div>
       <div class="sig-line"></div>
-      <div class="sig-mention">Lu et approuvé — Signature et cachet</div>
+      <div class="sig-mention">Lu et approuvé &mdash; Signature et cachet</div>
     </div>
     <div class="sig-block">
       <div class="sig-label">Signature de l'acheteur</div>
       <div class="sig-name">${clientFullName}</div>
       <div class="sig-line"></div>
-      <div class="sig-mention">Lu et approuvé — Bon pour accord</div>
+      <div class="sig-mention">Lu et approuvé &mdash; Bon pour accord</div>
     </div>
   </div>
 
   <!-- ═══ FOOTER ═══ -->
   <div class="footer">
-    Document généré le ${generatedDate} · ${invoiceNumber}
-    ${sellerSiret ? ' · BCE / TVA : ' + sellerSiret : ''}
+    Document généré le ${generatedDate}&nbsp;&nbsp;&bull;&nbsp;&nbsp;Facture N° ${invoiceNumber}${sellerSiret ? '&nbsp;&nbsp;&bull;&nbsp;&nbsp;BCE / TVA : ' + sellerSiret : ''}
   </div>
 
 </div>

@@ -52,6 +52,8 @@
     "expo-symbols": "~55.0.5",
     "expo-system-ui": "^55.0.9",
     "expo-web-browser": "~55.0.9",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.0",
     "nativewind": "^4.1",
     "pizzip": "^3.2.0",
     "react": "19.2.0",
